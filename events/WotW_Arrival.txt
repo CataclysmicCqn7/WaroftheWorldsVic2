@@ -1,0 +1,4470 @@
+# War of the Worlds - the arrival (first wave)
+#
+# NOTE: events fired with country_event = { id = X days = N } IGNORE their trigger
+# block. Every check is therefore done inside the effects with
+# any_owned = { limit = { ... } }, which the game does honour.
+#
+# 777100  Flashes Observed on Mars    every civilized country, Oct 1894 (Mars opposition)
+# 777105  A Falling Star              owner of the landing site, ~26 months later (Dec 1896)
+# 777110  The Cylinder at Oxford owner of 294: MAR is released at peace.
+#                                     A: storm the pit now (war)   B: white flag (Martians attack on day 31)
+# 777111  We Have Arrived             MAR: country setup
+# 777112  The Lid Falls               MAR, day 10: crew emerges, or the cylinder is destroyed
+# 777113  The Cylinder Is Destroyed   MAR: humans hold the pit, the landing is crushed
+# 777116  The Fighting Machines Rise  MAR, day 30: the first 12 tripods appear, or the pit is destroyed
+# 777115  The Deputation              MAR, day 31 (option B only): Martians declare war
+#
+# Testing: as the owner of Oxford (294), type "event 777110" in the console.
+
+#Flashes Observed on Mars
+country_event = {
+	id = 777100
+	title = "EVTNAME777100"
+	desc = "EVTDESC777100"
+	picture = "Invention"
+
+	trigger = {
+		civilized = yes
+		NOT = { tag = MAR }
+		NOT = { has_country_flag = mars_flashes_seen }
+		OR = {
+			year = 1895
+			AND = {
+				year = 1894
+				month = 9
+			}
+		}
+	}
+
+	mean_time_to_happen = { days = 1 }
+
+	option = {
+		name = "EVTOPTA777100"
+		set_country_flag = mars_flashes_seen
+		set_global_flag = mars_flashes
+		# The landing comes at the next opposition, about 26 months later
+		any_owned = {
+			limit = { province_id = 294 }
+			owner = { country_event = { id = 777105 days = 780 } }
+		}
+	}
+}
+
+#A Falling Star
+country_event = {
+	id = 777105
+	title = "EVTNAME777105"
+	desc = "EVTDESC777105"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777105"
+		# Whoever owns the site by now receives the cylinder
+		294 = { owner = { country_event = 777110 } }
+	}
+}
+
+#The Cylinder at Oxford
+country_event = {
+	id = 777110
+	title = "EVTNAME777110"
+	desc = "EVTDESC777110"
+	picture = "Riot"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777110"	# Storm the pit before it opens
+		set_global_flag = martian_first_landing
+		294 = { add_core = MAR }
+		release = MAR
+		MAR = {
+			country_event = 777111
+			country_event = { id = 777112 days = 10 }
+			country_event = { id = 777116 days = 30 }
+			country_event = { id = 777200 days = 780 }
+			country_event = { id = 777322 days = 7 }
+			country_event = { id = 777360 days = 180 }
+			country_event = { id = 777203 days = 2 }
+			country_event = { id = 777203 days = 5 }
+			country_event = 777324
+		}
+		ai_chance = { factor = 30 }
+	}
+
+	option = {
+		name = "EVTOPTB777110"	# Send a deputation under a white flag
+		set_global_flag = martian_first_landing
+		294 = { add_core = MAR }
+		release = MAR
+		MAR = {
+			country_event = 777111
+			country_event = { id = 777112 days = 10 }
+			country_event = { id = 777116 days = 30 }
+			country_event = { id = 777200 days = 780 }
+			country_event = { id = 777322 days = 7 }
+			country_event = { id = 777360 days = 180 }
+			country_event = { id = 777203 days = 2 }
+			country_event = { id = 777203 days = 5 }
+			country_event = { id = 777115 days = 31 }
+		}
+		ai_chance = { factor = 70 }
+	}
+}
+
+#We Have Arrived
+country_event = {
+	id = 777111
+	title = "EVTNAME777111"
+	desc = "EVTDESC777111"
+	picture = "Riot"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777111"
+		capital = 294
+		capital_scope = {
+			add_province_modifier = { name = martian_landing_site duration = -1 }
+			add_province_modifier = { name = martian_unscrewing duration = 10 }
+		}
+		primary_culture = martian
+		government = martian_overmind
+		ruling_party_ideology = reactionary
+		civilized = yes
+		political_reform = yes_slavery
+		upper_house = {
+			ideology = reactionary
+			value = 1
+		}
+		activate_technology = martian_fighting_machines
+		add_country_modifier = { name = martian_technology duration = -1 }
+		# The Black Smoke (gas attack) is the invention black_smoke, which only MAR can
+		# discover (activate_technology works for techs only, not inventions).
+		treasury = 10000
+		any_country = {
+			limit = { NOT = { tag = MAR } }
+			relation = { who = MAR value = -200 }
+		}
+	}
+}
+
+#The Lid Falls (day 10)
+country_event = {
+	id = 777112
+	title = "EVTNAME777112"
+	desc = "EVTDESC777112"
+	picture = "Riot"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777112"
+		# The pit has a soldier pop: it becomes the crew
+		any_owned = {
+			limit = {
+				OR = {
+					is_capital = yes
+					has_province_modifier = martian_landing_site
+				}
+				NOT = { has_province_modifier = martian_pit }
+				controlled_by = MAR
+				has_pop_type = soldiers
+			}
+			remove_province_modifier = martian_landing_site
+			remove_province_modifier = martian_unscrewing
+			add_province_modifier = { name = martian_pit duration = -1 }
+			add_province_modifier = { name = martian_assembling duration = 25 }
+			add_province_modifier = { name = martian_harvest_pens duration = -1 }
+			# The crew: each regiment needs 3000 soldiers. A typical soldier pop
+			# (Oxford 1836: 1500) times 40 gives 60000: exactly 20 tripods (3000 each).
+			# (total_pops can't be used to test a single pop's size.)
+			any_pop = {
+				limit = { type = soldiers }
+				reduce_pop = 40
+			}
+			# Everyone else in the pit goes into the pens
+			any_pop = {
+				limit = {
+					NOT = { type = soldiers }
+					NOT = { type = slaves }
+				}
+				pop_type = slaves
+			}
+			state_scope = { is_slave = yes }
+		}
+		# No soldier pop: a small slice of the local workers becomes the crew
+		any_owned = {
+			limit = {
+				OR = {
+					is_capital = yes
+					has_province_modifier = martian_landing_site
+				}
+				NOT = { has_province_modifier = martian_pit }
+				controlled_by = MAR
+				NOT = { has_pop_type = soldiers }
+			}
+			remove_province_modifier = martian_landing_site
+			remove_province_modifier = martian_unscrewing
+			add_province_modifier = { name = martian_pit duration = -1 }
+			add_province_modifier = { name = martian_assembling duration = 25 }
+			add_province_modifier = { name = martian_harvest_pens duration = -1 }
+			any_pop = {
+				limit = {
+					OR = {
+						type = farmers
+						type = labourers
+					}
+				}
+				pop_type = soldiers
+				reduce_pop = 0.6	# e.g. 73000 labourers -> ~44000 crew
+			}
+			# Everyone else in the pit goes into the pens
+			any_pop = {
+				limit = {
+					NOT = { type = soldiers }
+					NOT = { type = slaves }
+				}
+				pop_type = slaves
+			}
+			state_scope = { is_slave = yes }
+		}
+		# Humans hold the pit: the cylinder is destroyed
+		any_owned = {
+			limit = {
+				is_capital = yes
+				NOT = { has_province_modifier = martian_pit }
+				NOT = { controlled_by = MAR }
+			}
+			owner = { country_event = 777113 }
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_landing_site
+				NOT = { is_capital = yes }
+				NOT = { controlled_by = MAR }
+			}
+			remove_province_modifier = martian_landing_site
+			remove_province_modifier = martian_unscrewing
+			remove_core = MAR
+		}
+	}
+}
+
+#The Cylinder Is Destroyed
+country_event = {
+	id = 777113
+	title = "EVTNAME777113"
+	desc = "EVTDESC777113"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777113"
+		any_owned = {
+			limit = {
+				is_capital = yes
+				NOT = { controlled_by = MAR }
+			}
+			remove_province_modifier = martian_landing_site
+			remove_province_modifier = martian_unscrewing
+			remove_province_modifier = martian_assembling
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			controller = { inherit = MAR }
+		}
+	}
+}
+
+#The Fighting Machines Rise (day 30)
+country_event = {
+	id = 777116
+	title = "EVTNAME777116"
+	desc = "EVTDESC777116"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777116"
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_assembling
+				controlled_by = MAR
+			}
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			remove_province_modifier = martian_assembling
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_assembling
+				NOT = { controlled_by = MAR }
+				is_capital = yes
+			}
+			owner = { country_event = 777113 }
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_assembling
+				NOT = { controlled_by = MAR }
+				NOT = { is_capital = yes }
+			}
+			remove_province_modifier = martian_assembling
+			remove_core = MAR
+		}
+	}
+}
+
+#The Deputation (day 31, white-flag path only)
+country_event = {
+	id = 777115
+	title = "EVTNAME777115"
+	desc = "EVTDESC777115"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777115"
+		war = {
+			target = FROM
+			attacker_goal = {
+				casus_belli = martian_invasion
+				country = MAR
+			}
+			defender_goal = {
+				casus_belli = martian_extermination
+				country = FROM
+			}
+		}
+	}
+}
+
+#The Next Opposition (every 780 days): one target region, three cylinders a few days apart
+country_event = {
+	id = 777200
+	title = "EVTNAME777200"
+	desc = "EVTDESC777200"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777200"
+		random_list = {
+			10 = {
+				country_event = 777210
+				country_event = { id = 777210 days = 2 }
+				country_event = { id = 777210 days = 5 }
+			}
+			6 = {
+				country_event = 777211
+				country_event = { id = 777211 days = 2 }
+				country_event = { id = 777211 days = 5 }
+			}
+			4 = {
+				country_event = 777212
+				country_event = { id = 777212 days = 2 }
+				country_event = { id = 777212 days = 5 }
+			}
+			6 = {
+				country_event = 777213
+				country_event = { id = 777213 days = 2 }
+				country_event = { id = 777213 days = 5 }
+			}
+			4 = {
+				country_event = 777214
+				country_event = { id = 777214 days = 2 }
+				country_event = { id = 777214 days = 5 }
+			}
+			4 = {
+				country_event = 777215
+				country_event = { id = 777215 days = 2 }
+				country_event = { id = 777215 days = 5 }
+			}
+			4 = {
+				country_event = 777216
+				country_event = { id = 777216 days = 2 }
+				country_event = { id = 777216 days = 5 }
+			}
+			4 = {
+				country_event = 777217
+				country_event = { id = 777217 days = 2 }
+				country_event = { id = 777217 days = 5 }
+			}
+			7 = {
+				country_event = 777218
+				country_event = { id = 777218 days = 2 }
+				country_event = { id = 777218 days = 5 }
+			}
+			4 = {
+				country_event = 777219
+				country_event = { id = 777219 days = 2 }
+				country_event = { id = 777219 days = 5 }
+			}
+			4 = {
+				country_event = 777220
+				country_event = { id = 777220 days = 2 }
+				country_event = { id = 777220 days = 5 }
+			}
+			4 = {
+				country_event = 777221
+				country_event = { id = 777221 days = 2 }
+				country_event = { id = 777221 days = 5 }
+			}
+			4 = {
+				country_event = 777222
+				country_event = { id = 777222 days = 2 }
+				country_event = { id = 777222 days = 5 }
+			}
+			4 = {
+				country_event = 777223
+				country_event = { id = 777223 days = 2 }
+				country_event = { id = 777223 days = 5 }
+			}
+			4 = {
+				country_event = 777224
+				country_event = { id = 777224 days = 2 }
+				country_event = { id = 777224 days = 5 }
+			}
+			4 = {
+				country_event = 777225
+				country_event = { id = 777225 days = 2 }
+				country_event = { id = 777225 days = 5 }
+			}
+			7 = {
+				country_event = 777226
+				country_event = { id = 777226 days = 2 }
+				country_event = { id = 777226 days = 5 }
+			}
+			4 = {
+				country_event = 777227
+				country_event = { id = 777227 days = 2 }
+				country_event = { id = 777227 days = 5 }
+			}
+			4 = {
+				country_event = 777228
+				country_event = { id = 777228 days = 2 }
+				country_event = { id = 777228 days = 5 }
+			}
+			4 = {
+				country_event = 777229
+				country_event = { id = 777229 days = 2 }
+				country_event = { id = 777229 days = 5 }
+			}
+			4 = {
+				country_event = 777230
+				country_event = { id = 777230 days = 2 }
+				country_event = { id = 777230 days = 5 }
+			}
+		}
+		country_event = { id = 777199 days = 780 }
+	}
+}
+
+#Wave region: Southern England
+country_event = {
+	id = 777210
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 300
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 293
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 295
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 301
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 302
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 291
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 292
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 289
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 303
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Northern France
+country_event = {
+	id = 777211
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 425
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 403
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 416
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 426
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 427
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2570
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 401
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 402
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 404
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 405
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 408
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 415
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Low Countries
+country_event = {
+	id = 777212
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 387
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 389
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 390
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 391
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 392
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 393
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 394
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 395
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 378
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 388
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 379
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 380
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Northern Germany
+country_event = {
+	id = 777213
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 549
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 550
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 551
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 552
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 553
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 555
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 556
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 557
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 545
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 546
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 547
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 681
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Austria-Bohemia
+country_event = {
+	id = 777214
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 619
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 620
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 621
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 624
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 631
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 633
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 616
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 617
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 622
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 630
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 623
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 639
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Central Italy
+country_event = {
+	id = 777215
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 749
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 750
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 751
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 753
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2567
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 748
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 747
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 752
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 757
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 754
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Central Spain
+country_event = {
+	id = 777216
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 487
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 483
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 488
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 489
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 477
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 480
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 481
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 482
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 490
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 497
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 485
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 486
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Baltic Russia
+country_event = {
+	id = 777217
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 994
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 339
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 996
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1003
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2580
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 340
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 341
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 342
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 984
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 988
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 995
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 997
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Central Russia
+country_event = {
+	id = 777218
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1008
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1009
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1010
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1011
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1013
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 998
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 999
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1000
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1014
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1015
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1012
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1017
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: The Straits
+country_event = {
+	id = 777219
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 860
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 858
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 817
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 828
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 859
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Egypt
+country_event = {
+	id = 777220
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1745
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1747
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1748
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1749
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1750
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1763
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1746
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1751
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1759
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1755
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1772
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1765
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Western India
+country_event = {
+	id = 777221
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1297
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1296
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1298
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1299
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1301
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1295
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1271
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1276
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1278
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1284
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1300
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1302
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Bengal
+country_event = {
+	id = 777222
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1251
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1249
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1253
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1256
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1261
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1262
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1248
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1250
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1282
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1252
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1255
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1254
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Northern China
+country_event = {
+	id = 777223
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1612
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1576
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1615
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1616
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1617
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1618
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1532
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1572
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1563
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1614
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1534
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1613
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Southern China
+country_event = {
+	id = 777224
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1493
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1496
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1497
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1498
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1500
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1501
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1504
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1494
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1550
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1527
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1530
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1495
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Japan
+country_event = {
+	id = 777225
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1649
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1650
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1651
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1652
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1653
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1676
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1674
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1677
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 1669
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Northeast United States
+country_event = {
+	id = 777226
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 232
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 229
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 233
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 234
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 235
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 241
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 223
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 224
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 230
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 238
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 240
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 245
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: American Midwest
+country_event = {
+	id = 777227
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 163
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 159
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 162
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 164
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 165
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 171
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 161
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 153
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 155
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 160
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 166
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 167
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Central Mexico
+country_event = {
+	id = 777228
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2172
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2174
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2175
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2176
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2180
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2170
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2173
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2162
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2163
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2177
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2171
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2179
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: Southeast Brazil
+country_event = {
+	id = 777229
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2447
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2441
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2446
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2448
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2451
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2442
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2443
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2449
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2445
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2452
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2450
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2455
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#Wave region: River Plate
+country_event = {
+	id = 777230
+	title = "EVTNAME777202"
+	desc = "EVTDESC777202"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777202"
+		random_list = {
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2348
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2349
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2350
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2351
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2360
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2353
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2363
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2352
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2354
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2359
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+			1 = {
+				any_country = {
+					any_owned = {
+						limit = {
+							province_id = 2361
+							NOT = { owned_by = MAR }
+						}
+						owner = { country_event = 777201 }
+						add_core = MAR
+						secede_province = MAR
+						add_province_modifier = { name = martian_landing_site duration = -1 }
+						add_province_modifier = { name = martian_unscrewing duration = 10 }
+					}
+				}
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#More cylinders of the first wave, near London: a random one of the five sites still in human hands (no war of their own)
+country_event = {
+	id = 777203
+	title = "EVTNAME777203"
+	desc = "EVTDESC777203"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777203"
+		any_country = {
+			limit = { NOT = { tag = MAR } }
+			random_owned = {
+				limit = {
+					OR = {
+						province_id = 295
+						province_id = 293
+						province_id = 302
+						province_id = 303
+						province_id = 297
+					}
+				}
+				add_core = MAR
+				secede_province = MAR
+				add_province_modifier = { name = martian_landing_site duration = -1 }
+				add_province_modifier = { name = martian_unscrewing duration = 10 }
+			}
+		}
+		country_event = { id = 777112 days = 10 }
+		country_event = { id = 777116 days = 30 }
+	}
+}
+
+#A Cylinder Falls (the site's owner goes to war)
+country_event = {
+	id = 777201
+	title = "EVTNAME777201"
+	desc = "EVTDESC777201"
+	picture = "Riot"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777201"
+		random_owned = {
+			limit = { owner = { NOT = { war_with = MAR } } }
+			owner = { MAR = { country_event = 777324 } }
+		}
+	}
+}
+
+#Relay: an event can't schedule itself, so 777200 schedules this one, which fires 777200 again
+country_event = {
+	id = 777199
+	title = "EVTNAME777200"
+	desc = "EVTDESC777200"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777200"
+		country_event = 777200
+	}
+}

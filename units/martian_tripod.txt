@@ -1,0 +1,42 @@
+# Martian Fighting Machine ("Tripod")
+# Exclusive to MAR. Locked by default (active = no); unlocked with activate_unit.
+# Design: near-zero build/supply cost, production limited by build time only.
+# A handful of tripods must beat a whole 1890s home army: attack 80 / defence 50
+# against infantry around 4/4 (GFM tank 21/13).
+
+martian_tripod = {
+    icon = 22                  # own slot: tab unit_folder_22, frame 22 of unit_strip.dds (tank copy for now)
+    type = land
+    sprite = Tank              # temporary: tank model
+    active = no
+    unit_type = special
+    floating_flag = no
+    # Crews are the soldiers of the Martian pit (all other pops in Martian land are slaves)
+    move_sound = army_move
+    select_sound = army_selected
+
+    #Core Abilities
+    priority = 100
+    max_strength = 3
+    default_organisation = 80
+    maximum_speed = 6.00
+    weighted_value = 100.0
+
+    #Building Costs
+    build_time = 365           # one year: the first machines are spawned by event 777116
+    build_cost = {
+	}
+
+    supply_consumption = 0.1
+    supply_cost = {
+	}
+
+    #Land Abilities
+    reconnaissance = 3   # tall machines see far
+    attack = 80          # Heat-Ray
+    defence = 50         # armoured hood: musket and cannon barely scratch it
+    discipline = 1.0
+    support = 0.0
+    maneuver = 4         # long legs: reaches past the line to the flanks
+    siege = 4            # Heat-Ray melts fortifications
+}

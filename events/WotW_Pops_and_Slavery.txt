@@ -1,0 +1,3847 @@
+# War of the Worlds - Martian crews and slavery
+# Victoria 2 can't check province flags in event triggers and can't change one
+# pop's culture, so province modifiers mark state and the crew is "the soldier
+# pop of the pit": every other pop in Martian land becomes slaves.
+#
+# (The crew is created by the arrival chain in WotW_Arrival.txt)
+# 777010  Harvest Pens         all non-crew pops in Martian provinces -> slaves, slave state
+# 777020  Freed from the Pens  liberated province: slaves -> farmers, modifiers removed
+
+#Harvest Pens
+province_event = {
+	id = 777010
+	title = "EVTNAME777010"
+	desc = "EVTDESC777010"
+	picture = "Slaves"
+
+	trigger = {
+		owner = { tag = MAR }
+		any_pop = {
+			NOT = { type = slaves }
+			NOT = { type = soldiers }
+		}
+		# A pit that hasn't opened yet waits for its crew (event 777112)
+		NOT = { has_province_modifier = martian_landing_site }
+	}
+
+	mean_time_to_happen = { days = 3 }
+
+	option = {
+		name = "EVTOPTA777010"
+		add_province_modifier = { name = martian_harvest_pens duration = -1 }
+		any_pop = {
+			limit = {
+				NOT = { type = slaves }
+				NOT = { type = soldiers }
+			}
+			pop_type = slaves
+		}
+		state_scope = { is_slave = yes }
+	}
+}
+
+#Freed from the Pens
+province_event = {
+	id = 777020
+	title = "EVTNAME777020"
+	desc = "EVTDESC777020"
+	picture = "Slaves"
+
+	trigger = {
+		has_province_modifier = martian_harvest_pens
+		NOT = { owner = { tag = MAR } }
+	}
+
+	mean_time_to_happen = { days = 3 }
+
+	option = {
+		name = "EVTOPTA777020"
+		remove_province_modifier = martian_harvest_pens
+		remove_province_modifier = martian_pit
+		any_pop = {
+			limit = { type = slaves }
+			pop_type = farmers
+			militancy = 3
+		}
+		state_scope = { is_slave = no }
+	}
+}
+
+#Annexed by the Martians: a province held by MAR for about 90 days becomes theirs
+province_event = {
+	id = 777300
+	title = "EVTNAME777300"
+	desc = "EVTDESC777300"
+	picture = "Riot"
+
+	trigger = {
+		controlled_by = MAR
+		NOT = { owned_by = MAR }
+	}
+
+	mean_time_to_happen = { days = 90 }
+
+	option = {
+		name = "EVTOPTA777300"
+		secede_province = MAR
+	}
+}
+
+#Eternal war: MAR attacks every neighbour it isn't at war with
+country_event = {
+	id = 777321
+	title = "EVTNAME777321"
+	desc = "EVTDESC777321"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777321"
+		random_owned = {
+			limit = { owner = { NOT = { war_with = MAR } } }
+			owner = { MAR = { country_event = 777324 } }
+		}
+	}
+}
+
+#Red Weed: grows in Martian provinces, then spreads to neighbours
+province_event = {
+	id = 777340
+	title = "EVTNAME777340"
+	desc = "EVTDESC777340"
+	picture = "destroyed_forest"
+
+	trigger = {
+		owned_by = MAR
+		NOT = { has_province_modifier = martian_red_weed }
+	}
+
+	mean_time_to_happen = { days = 180 }
+
+	option = {
+		name = "EVTOPTA777340"
+		add_province_modifier = { name = martian_red_weed duration = -1 }
+	}
+}
+
+#Red Weed: grows in Martian provinces, then spreads to neighbours
+province_event = {
+	id = 777341
+	title = "EVTNAME777341"
+	desc = "EVTDESC777341"
+	picture = "destroyed_forest"
+
+	trigger = {
+		NOT = { owned_by = MAR }
+		NOT = { has_province_modifier = martian_red_weed }
+		NOT = { has_global_flag = martians_dead }
+		any_neighbor_province = { has_province_modifier = martian_red_weed }
+	}
+
+	mean_time_to_happen = { days = 365 }
+
+	option = {
+		name = "EVTOPTA777341"
+		add_province_modifier = { name = martian_red_weed duration = -1 }
+	}
+}
+
+#The Feeding: Martian stipend about every 3 months, more for every province with Harvest Pens; 2% of the slaves are culled
+country_event = {
+	id = 777330
+	title = "EVTNAME777330"
+	desc = "EVTDESC777330"
+	picture = "Slaves"
+
+	trigger = {
+		tag = MAR
+	}
+
+	mean_time_to_happen = { days = 90 }
+
+	option = {
+		name = "EVTOPTA777330"
+		treasury = 4500
+		any_country = {
+			limit = { NOT = { tag = MAR } }
+			relation = { who = MAR value = -200 }
+		}
+		any_country = {
+			limit = { alliance_with = MAR }
+			leave_alliance = MAR
+		}
+		any_owned = {
+			limit = { has_province_modifier = martian_harvest_pens }
+			owner = { treasury = 300 }
+			any_pop = {
+				limit = { type = slaves }
+				reduce_pop = 0.98
+			}
+		}
+	}
+}
+
+#War check every 7 days (scheduled events fire on the exact day; MTTH events are only checked about monthly)
+country_event = {
+	id = 777322
+	title = "EVTNAME777322"
+	desc = "EVTDESC777322"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777322"
+		country_event = { id = 777325 days = 7 }
+		political_reform = yes_slavery
+		any_neighbor_country = {
+			limit = { NOT = { war_with = MAR } }
+			country_event = 777321
+		}
+		any_greater_power = {
+			limit = {
+				NOT = { tag = MAR }
+				NOT = { war_with = MAR }
+			}
+			country_event = 777321
+		}
+		country_event = 777326
+	}
+}
+
+#The Martians declare war on FROM, with war goals for both sides (sent by 777201 and 777321, like the Deputation)
+country_event = {
+	id = 777324
+	title = "EVTNAME777321"
+	desc = "EVTDESC777321"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777320"
+		war = {
+			target = FROM
+			attacker_goal = {
+				casus_belli = martian_invasion
+				country = MAR
+			}
+			defender_goal = {
+				casus_belli = martian_extermination
+				country = FROM
+			}
+		}
+	}
+}
+
+#Relay: an event can't schedule itself, so 777322 schedules this one, which fires 777322 again
+country_event = {
+	id = 777325
+	title = "EVTNAME777322"
+	desc = "EVTDESC777322"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777322"
+		country_event = 777322
+	}
+}
+
+#Weekly: war on every country with a core on Martian land, liberation timers and land return
+country_event = {
+	id = 777326
+	title = "EVTNAME777326"
+	desc = "EVTDESC777326"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777326"
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				controlled_by = MAR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_hold_broken_timer
+		}
+		any_owned = {
+			limit = {
+				NOT = { controlled_by = MAR }
+				NOT = { has_province_modifier = martian_hold_broken }
+			}
+			add_province_modifier = { name = martian_hold_broken duration = -1 }
+			add_province_modifier = { name = martian_hold_broken_timer duration = 60 }
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ENG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ENG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = RUS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = RUS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = FRA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = FRA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PRU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PRU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GER
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GER
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = AUS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = AUS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = USA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = USA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JAP
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JAP
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ITA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ITA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KUK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KUK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = DEN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = DEN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = FIN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = FIN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NOR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NOR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SCA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SCA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SWE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SWE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BEL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BEL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CAT
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CAT
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = FLA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = FLA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = IRE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = IRE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NET
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NET
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = POR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = POR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SCO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SCO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SPA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SPA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = WLL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = WLL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ANH
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ANH
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BAD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BAD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BAV
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BAV
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BRA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BRA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BRE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BRE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = COB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = COB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = DZG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = DZG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = FRM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = FRM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HAM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HAM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HAN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HAN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HES
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HES
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HEK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HEK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HOL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HOL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LIP
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LIP
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LUB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LUB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LUX
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LUX
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MEC
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MEC
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MEI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MEI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NAS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NAS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NGF
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NGF
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = OLD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = OLD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SAX
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SAX
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SCH
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SCH
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SGF
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SGF
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = WEI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = WEI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = WUR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = WUR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LOM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LOM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LUC
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LUC
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MOD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MOD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PAP
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PAP
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PAR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PAR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SAR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SAR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SIC
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SIC
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TRE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TRE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TUS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TUS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = VEN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = VEN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BOH
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BOH
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KRA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KRA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CRI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CRI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = EST
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = EST
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HUN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HUN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LIT
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LIT
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LAT
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LAT
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = POL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = POL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SLV
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SLV
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SWI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SWI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = RUT
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = RUT
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SIE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SIE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = UKR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = UKR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CZH
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CZH
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ALB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ALB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BOS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BOS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BUL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BUL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CRE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CRE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CRO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CRO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CYP
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CYP
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GRE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GRE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ION
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ION
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MOL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MOL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MON
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MON
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ROM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ROM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SER
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SER
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SLO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SLO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TUR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TUR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = WAL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = WAL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = YUG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = YUG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ALD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ALD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CNG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CNG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = EGY
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = EGY
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ETH
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ETH
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MAD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MAD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LIB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LIB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MOR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MOR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NAL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NAL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ORA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ORA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SAF
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SAF
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SOK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SOK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = RHO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = RHO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TRI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TRI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TRN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TRN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TUN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TUN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ZAN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ZAN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ZUL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ZUL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ABU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ABU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = AFG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = AFG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ARM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ARM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = AZB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = AZB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BUK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BUK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GEO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GEO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HDJ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HDJ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = IRQ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = IRQ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KHI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KHI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KOK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KOK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MUG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MUG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NEJ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NEJ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = OMA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = OMA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PER
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PER
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = YEM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = YEM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HND
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HND
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = AWA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = AWA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BAS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BAS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BER
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BER
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BHO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BHO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BIK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BIK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BUN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BUN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GWA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GWA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HYD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HYD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = IND
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = IND
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JAI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JAI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JAS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JAS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JOD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JOD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KAL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KAL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KAS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KAS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KUT
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KUT
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LAD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LAD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MAK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MAK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MEW
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MEW
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MYS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MYS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NAG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NAG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NEP
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NEP
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ORI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ORI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PAN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PAN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SHI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SHI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SIK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SIK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SIN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SIN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TRA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TRA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ATJ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ATJ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BAL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BAL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BHU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BHU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BRU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BRU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BUR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BUR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CAM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CAM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CHI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CHI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = DAI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = DAI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JAV
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JAV
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = KOR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = KOR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = LUA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = LUA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JOH
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JOH
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SIA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SIA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TIB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TIB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MGL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MGL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = WIA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = WIA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PHI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PHI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MCK
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MCK
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GXI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GXI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = SXI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = SXI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = YNN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = YNN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = XBI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = XBI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = XIN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = XIN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CAL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CAL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CAN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CAN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CHE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CHE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = COL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = COL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = COS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = COS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CSA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CSA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CUB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CUB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = DES
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = DES
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = DOM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = DOM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ELS
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ELS
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GUA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GUA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HAI
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HAI
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HAW
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HAW
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MAN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MAN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MEX
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MEX
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = MTC
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = MTC
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = HON
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = HON
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NEN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NEN
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NEW
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NEW
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NIC
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NIC
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PNM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PNM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = QUE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = QUE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TEX
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TEX
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = UCA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = UCA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ARG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ARG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BOL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BOL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BRZ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BRZ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CHL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CHL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = CLM
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = CLM
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ECU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ECU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PEU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PEU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PRG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PRG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = URU
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = URU
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = VNZ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = VNZ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = AST
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = AST
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = NZL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = NZL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ISR
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ISR
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BYZ
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BYZ
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ICL
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ICL
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BAB
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BAB
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = TPG
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = TPG
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = ARA
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = ARA
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = UBD
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = UBD
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = BYE
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = BYE
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = PLC
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = PLC
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = GCO
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = GCO
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+				is_core = JAN
+			}
+			remove_province_modifier = martian_hold_broken
+			remove_province_modifier = martian_pit
+			remove_core = MAR
+			secede_province = JAN
+		}
+		any_owned = {
+			limit = { is_core = ENG }
+			ENG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = RUS }
+			RUS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = FRA }
+			FRA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PRU }
+			PRU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GER }
+			GER = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = AUS }
+			AUS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = USA }
+			USA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JAP }
+			JAP = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ITA }
+			ITA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KUK }
+			KUK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = DEN }
+			DEN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = FIN }
+			FIN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NOR }
+			NOR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SCA }
+			SCA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SWE }
+			SWE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BEL }
+			BEL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CAT }
+			CAT = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = FLA }
+			FLA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = IRE }
+			IRE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NET }
+			NET = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = POR }
+			POR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SCO }
+			SCO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SPA }
+			SPA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = WLL }
+			WLL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ANH }
+			ANH = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BAD }
+			BAD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BAV }
+			BAV = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BRA }
+			BRA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BRE }
+			BRE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = COB }
+			COB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = DZG }
+			DZG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = FRM }
+			FRM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HAM }
+			HAM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HAN }
+			HAN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HES }
+			HES = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HEK }
+			HEK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HOL }
+			HOL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LIP }
+			LIP = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LUB }
+			LUB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LUX }
+			LUX = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MEC }
+			MEC = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MEI }
+			MEI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NAS }
+			NAS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NGF }
+			NGF = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = OLD }
+			OLD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SAX }
+			SAX = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SCH }
+			SCH = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SGF }
+			SGF = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = WEI }
+			WEI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = WUR }
+			WUR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LOM }
+			LOM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LUC }
+			LUC = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MOD }
+			MOD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PAP }
+			PAP = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PAR }
+			PAR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SAR }
+			SAR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SIC }
+			SIC = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TRE }
+			TRE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TUS }
+			TUS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = VEN }
+			VEN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BOH }
+			BOH = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KRA }
+			KRA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CRI }
+			CRI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = EST }
+			EST = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HUN }
+			HUN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LIT }
+			LIT = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LAT }
+			LAT = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = POL }
+			POL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SLV }
+			SLV = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SWI }
+			SWI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = RUT }
+			RUT = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SIE }
+			SIE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = UKR }
+			UKR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CZH }
+			CZH = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ALB }
+			ALB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BOS }
+			BOS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BUL }
+			BUL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CRE }
+			CRE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CRO }
+			CRO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CYP }
+			CYP = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GRE }
+			GRE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ION }
+			ION = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MOL }
+			MOL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MON }
+			MON = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ROM }
+			ROM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SER }
+			SER = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SLO }
+			SLO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TUR }
+			TUR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = WAL }
+			WAL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = YUG }
+			YUG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ALD }
+			ALD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CNG }
+			CNG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = EGY }
+			EGY = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ETH }
+			ETH = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MAD }
+			MAD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LIB }
+			LIB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MOR }
+			MOR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NAL }
+			NAL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ORA }
+			ORA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SAF }
+			SAF = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SOK }
+			SOK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = RHO }
+			RHO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TRI }
+			TRI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TRN }
+			TRN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TUN }
+			TUN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ZAN }
+			ZAN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ZUL }
+			ZUL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ABU }
+			ABU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = AFG }
+			AFG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ARM }
+			ARM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = AZB }
+			AZB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BUK }
+			BUK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GEO }
+			GEO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HDJ }
+			HDJ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = IRQ }
+			IRQ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KHI }
+			KHI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KOK }
+			KOK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MUG }
+			MUG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NEJ }
+			NEJ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = OMA }
+			OMA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PER }
+			PER = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = YEM }
+			YEM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HND }
+			HND = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = AWA }
+			AWA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BAS }
+			BAS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BER }
+			BER = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BHO }
+			BHO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BIK }
+			BIK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BUN }
+			BUN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GWA }
+			GWA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HYD }
+			HYD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = IND }
+			IND = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JAI }
+			JAI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JAS }
+			JAS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JOD }
+			JOD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KAL }
+			KAL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KAS }
+			KAS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KUT }
+			KUT = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LAD }
+			LAD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MAK }
+			MAK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MEW }
+			MEW = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MYS }
+			MYS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NAG }
+			NAG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NEP }
+			NEP = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ORI }
+			ORI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PAN }
+			PAN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SHI }
+			SHI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SIK }
+			SIK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SIN }
+			SIN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TRA }
+			TRA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ATJ }
+			ATJ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BAL }
+			BAL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BHU }
+			BHU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BRU }
+			BRU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BUR }
+			BUR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CAM }
+			CAM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CHI }
+			CHI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = DAI }
+			DAI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JAV }
+			JAV = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = KOR }
+			KOR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = LUA }
+			LUA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JOH }
+			JOH = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SIA }
+			SIA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TIB }
+			TIB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MGL }
+			MGL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = WIA }
+			WIA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PHI }
+			PHI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MCK }
+			MCK = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GXI }
+			GXI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = SXI }
+			SXI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = YNN }
+			YNN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = XBI }
+			XBI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = XIN }
+			XIN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CAL }
+			CAL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CAN }
+			CAN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CHE }
+			CHE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = COL }
+			COL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = COS }
+			COS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CSA }
+			CSA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CUB }
+			CUB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = DES }
+			DES = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = DOM }
+			DOM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ELS }
+			ELS = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GUA }
+			GUA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HAI }
+			HAI = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HAW }
+			HAW = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MAN }
+			MAN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MEX }
+			MEX = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = MTC }
+			MTC = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = HON }
+			HON = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NEN }
+			NEN = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NEW }
+			NEW = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NIC }
+			NIC = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PNM }
+			PNM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = QUE }
+			QUE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TEX }
+			TEX = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = UCA }
+			UCA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ARG }
+			ARG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BOL }
+			BOL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BRZ }
+			BRZ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CHL }
+			CHL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = CLM }
+			CLM = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ECU }
+			ECU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PEU }
+			PEU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PRG }
+			PRG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = URU }
+			URU = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = VNZ }
+			VNZ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = AST }
+			AST = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = NZL }
+			NZL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ISR }
+			ISR = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BYZ }
+			BYZ = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ICL }
+			ICL = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BAB }
+			BAB = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = TPG }
+			TPG = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = ARA }
+			ARA = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = UBD }
+			UBD = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = BYE }
+			BYE = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = PLC }
+			PLC = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = GCO }
+			GCO = { country_event = 777321 }
+		}
+		any_owned = {
+			limit = { is_core = JAN }
+			JAN = { country_event = 777321 }
+		}
+	}
+}
+
+#Reinforcement Cylinders, every 180 days: each Martian pit grows its crew by 15% and gets 6 fresh tripods
+country_event = {
+	id = 777360
+	title = "EVTNAME777360"
+	desc = "EVTDESC777360"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777360"
+		country_event = { id = 777361 days = 180 }
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_pit
+				controlled_by = MAR
+			}
+			any_pop = {
+				limit = { type = soldiers }
+				reduce_pop = 1.15
+			}
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+		}
+	}
+}
+
+#Relay for 777360 (an event can't schedule itself)
+country_event = {
+	id = 777361
+	title = "EVTNAME777360"
+	desc = "EVTDESC777360"
+	picture = "balloon"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777360"
+		country_event = 777360
+	}
+}
