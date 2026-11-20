@@ -16,3 +16,7 @@ martian_hold_broken;Out of Martian Hands;;;;;;;;;;;;;x
 martian_hold_broken_desc;The Martians have lost control of this province. If they don't retake it, it will return to its rightful owner.;;;;;;;;;;;;;x
 martian_hold_broken_timer;Liberation Pending;;;;;;;;;;;;;x
 martian_hold_broken_timer_desc;In 60 days this province returns to its rightful owner, unless the Martians retake it first.;;;;;;;;;;;;;x
+martian_vanguard;Martian Vanguard;;;;;;;;;;;;;x
+martian_vanguard_desc;The cylinder's crew has emerged and its first fighting machines are in the field.;;;;;;;;;;;;;x
+martian_production;Machines Under Assembly;;;;;;;;;;;;;x
+martian_production_desc;New fighting machines are being assembled in this pit. They will rise when this timer runs out, unless the pit is taken.;;;;;;;;;;;;;x

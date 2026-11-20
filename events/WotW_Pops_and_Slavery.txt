@@ -1,13 +1,3 @@
-# War of the Worlds - Martian crews and slavery
-# Victoria 2 can't check province flags in event triggers and can't change one
-# pop's culture, so province modifiers mark state and the crew is "the soldier
-# pop of the pit": every other pop in Martian land becomes slaves.
-#
-# (The crew is created by the arrival chain in WotW_Arrival.txt)
-# 777010  Harvest Pens         all non-crew pops in Martian provinces -> slaves, slave state
-# 777020  Freed from the Pens  liberated province: slaves -> farmers, modifiers removed
-
-#Harvest Pens
 province_event = {
 	id = 777010
 	title = "EVTNAME777010"
@@ -20,7 +10,6 @@ province_event = {
 			NOT = { type = slaves }
 			NOT = { type = soldiers }
 		}
-		# A pit that hasn't opened yet waits for its crew (event 777112)
 		NOT = { has_province_modifier = martian_landing_site }
 	}
 
@@ -40,7 +29,6 @@ province_event = {
 	}
 }
 
-#Freed from the Pens
 province_event = {
 	id = 777020
 	title = "EVTNAME777020"
@@ -56,6 +44,13 @@ province_event = {
 
 	option = {
 		name = "EVTOPTA777020"
+		any_pop = {
+			limit = {
+				type = soldiers
+				location = { has_province_modifier = martian_pit }
+			}
+			reduce_pop = 0
+		}
 		remove_province_modifier = martian_harvest_pens
 		remove_province_modifier = martian_pit
 		any_pop = {
@@ -67,7 +62,6 @@ province_event = {
 	}
 }
 
-#Annexed by the Martians: a province held by MAR for about 90 days becomes theirs
 province_event = {
 	id = 777300
 	title = "EVTNAME777300"
@@ -87,7 +81,6 @@ province_event = {
 	}
 }
 
-#Eternal war: MAR attacks every neighbour it isn't at war with
 country_event = {
 	id = 777321
 	title = "EVTNAME777321"
@@ -105,7 +98,6 @@ country_event = {
 	}
 }
 
-#Red Weed: grows in Martian provinces, then spreads to neighbours
 province_event = {
 	id = 777340
 	title = "EVTNAME777340"
@@ -125,7 +117,6 @@ province_event = {
 	}
 }
 
-#Red Weed: grows in Martian provinces, then spreads to neighbours
 province_event = {
 	id = 777341
 	title = "EVTNAME777341"
@@ -147,7 +138,6 @@ province_event = {
 	}
 }
 
-#The Feeding: Martian stipend about every 3 months, more for every province with Harvest Pens; 2% of the slaves are culled
 country_event = {
 	id = 777330
 	title = "EVTNAME777330"
@@ -182,7 +172,6 @@ country_event = {
 	}
 }
 
-#War check every 7 days (scheduled events fire on the exact day; MTTH events are only checked about monthly)
 country_event = {
 	id = 777322
 	title = "EVTNAME777322"
@@ -210,7 +199,6 @@ country_event = {
 	}
 }
 
-#The Martians declare war on FROM, with war goals for both sides (sent by 777201 and 777321, like the Deputation)
 country_event = {
 	id = 777324
 	title = "EVTNAME777321"
@@ -235,7 +223,6 @@ country_event = {
 	}
 }
 
-#Relay: an event can't schedule itself, so 777322 schedules this one, which fires 777322 again
 country_event = {
 	id = 777325
 	title = "EVTNAME777322"
@@ -250,7 +237,6 @@ country_event = {
 	}
 }
 
-#Weekly: war on every country with a core on Martian land, liberation timers and land return
 country_event = {
 	id = 777326
 	title = "EVTNAME777326"
@@ -261,6 +247,10 @@ country_event = {
 
 	option = {
 		name = "EVTOPTA777326"
+		any_country = {
+			limit = { has_country_flag = martian_attack_sent }
+			clr_country_flag = martian_attack_sent
+		}
 		any_owned = {
 			limit = {
 				has_province_modifier = martian_hold_broken
@@ -276,6 +266,18 @@ country_event = {
 			}
 			add_province_modifier = { name = martian_hold_broken duration = -1 }
 			add_province_modifier = { name = martian_hold_broken_timer duration = 60 }
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_pit
+				has_province_modifier = martian_hold_broken
+				NOT = { has_province_modifier = martian_hold_broken_timer }
+				NOT = { controlled_by = MAR }
+			}
+			any_pop = {
+				limit = { type = soldiers }
+				reduce_pop = 0
+			}
 		}
 		any_owned = {
 			limit = {
@@ -2919,888 +2921,2647 @@ country_event = {
 		}
 		any_owned = {
 			limit = { is_core = ENG }
-			ENG = { country_event = 777321 }
+			ENG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = RUS }
-			RUS = { country_event = 777321 }
+			RUS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = FRA }
-			FRA = { country_event = 777321 }
+			FRA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PRU }
-			PRU = { country_event = 777321 }
+			PRU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GER }
-			GER = { country_event = 777321 }
+			GER = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = AUS }
-			AUS = { country_event = 777321 }
+			AUS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = USA }
-			USA = { country_event = 777321 }
+			USA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JAP }
-			JAP = { country_event = 777321 }
+			JAP = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ITA }
-			ITA = { country_event = 777321 }
+			ITA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KUK }
-			KUK = { country_event = 777321 }
+			KUK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = DEN }
-			DEN = { country_event = 777321 }
+			DEN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = FIN }
-			FIN = { country_event = 777321 }
+			FIN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NOR }
-			NOR = { country_event = 777321 }
+			NOR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SCA }
-			SCA = { country_event = 777321 }
+			SCA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SWE }
-			SWE = { country_event = 777321 }
+			SWE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BEL }
-			BEL = { country_event = 777321 }
+			BEL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CAT }
-			CAT = { country_event = 777321 }
+			CAT = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = FLA }
-			FLA = { country_event = 777321 }
+			FLA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = IRE }
-			IRE = { country_event = 777321 }
+			IRE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NET }
-			NET = { country_event = 777321 }
+			NET = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = POR }
-			POR = { country_event = 777321 }
+			POR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SCO }
-			SCO = { country_event = 777321 }
+			SCO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SPA }
-			SPA = { country_event = 777321 }
+			SPA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = WLL }
-			WLL = { country_event = 777321 }
+			WLL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ANH }
-			ANH = { country_event = 777321 }
+			ANH = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BAD }
-			BAD = { country_event = 777321 }
+			BAD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BAV }
-			BAV = { country_event = 777321 }
+			BAV = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BRA }
-			BRA = { country_event = 777321 }
+			BRA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BRE }
-			BRE = { country_event = 777321 }
+			BRE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = COB }
-			COB = { country_event = 777321 }
+			COB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = DZG }
-			DZG = { country_event = 777321 }
+			DZG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = FRM }
-			FRM = { country_event = 777321 }
+			FRM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HAM }
-			HAM = { country_event = 777321 }
+			HAM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HAN }
-			HAN = { country_event = 777321 }
+			HAN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HES }
-			HES = { country_event = 777321 }
+			HES = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HEK }
-			HEK = { country_event = 777321 }
+			HEK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HOL }
-			HOL = { country_event = 777321 }
+			HOL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LIP }
-			LIP = { country_event = 777321 }
+			LIP = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LUB }
-			LUB = { country_event = 777321 }
+			LUB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LUX }
-			LUX = { country_event = 777321 }
+			LUX = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MEC }
-			MEC = { country_event = 777321 }
+			MEC = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MEI }
-			MEI = { country_event = 777321 }
+			MEI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NAS }
-			NAS = { country_event = 777321 }
+			NAS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NGF }
-			NGF = { country_event = 777321 }
+			NGF = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = OLD }
-			OLD = { country_event = 777321 }
+			OLD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SAX }
-			SAX = { country_event = 777321 }
+			SAX = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SCH }
-			SCH = { country_event = 777321 }
+			SCH = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SGF }
-			SGF = { country_event = 777321 }
+			SGF = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = WEI }
-			WEI = { country_event = 777321 }
+			WEI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = WUR }
-			WUR = { country_event = 777321 }
+			WUR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LOM }
-			LOM = { country_event = 777321 }
+			LOM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LUC }
-			LUC = { country_event = 777321 }
+			LUC = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MOD }
-			MOD = { country_event = 777321 }
+			MOD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PAP }
-			PAP = { country_event = 777321 }
+			PAP = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PAR }
-			PAR = { country_event = 777321 }
+			PAR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SAR }
-			SAR = { country_event = 777321 }
+			SAR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SIC }
-			SIC = { country_event = 777321 }
+			SIC = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TRE }
-			TRE = { country_event = 777321 }
+			TRE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TUS }
-			TUS = { country_event = 777321 }
+			TUS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = VEN }
-			VEN = { country_event = 777321 }
+			VEN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BOH }
-			BOH = { country_event = 777321 }
+			BOH = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KRA }
-			KRA = { country_event = 777321 }
+			KRA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CRI }
-			CRI = { country_event = 777321 }
+			CRI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = EST }
-			EST = { country_event = 777321 }
+			EST = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HUN }
-			HUN = { country_event = 777321 }
+			HUN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LIT }
-			LIT = { country_event = 777321 }
+			LIT = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LAT }
-			LAT = { country_event = 777321 }
+			LAT = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = POL }
-			POL = { country_event = 777321 }
+			POL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SLV }
-			SLV = { country_event = 777321 }
+			SLV = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SWI }
-			SWI = { country_event = 777321 }
+			SWI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = RUT }
-			RUT = { country_event = 777321 }
+			RUT = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SIE }
-			SIE = { country_event = 777321 }
+			SIE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = UKR }
-			UKR = { country_event = 777321 }
+			UKR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CZH }
-			CZH = { country_event = 777321 }
+			CZH = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ALB }
-			ALB = { country_event = 777321 }
+			ALB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BOS }
-			BOS = { country_event = 777321 }
+			BOS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BUL }
-			BUL = { country_event = 777321 }
+			BUL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CRE }
-			CRE = { country_event = 777321 }
+			CRE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CRO }
-			CRO = { country_event = 777321 }
+			CRO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CYP }
-			CYP = { country_event = 777321 }
+			CYP = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GRE }
-			GRE = { country_event = 777321 }
+			GRE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ION }
-			ION = { country_event = 777321 }
+			ION = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MOL }
-			MOL = { country_event = 777321 }
+			MOL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MON }
-			MON = { country_event = 777321 }
+			MON = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ROM }
-			ROM = { country_event = 777321 }
+			ROM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SER }
-			SER = { country_event = 777321 }
+			SER = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SLO }
-			SLO = { country_event = 777321 }
+			SLO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TUR }
-			TUR = { country_event = 777321 }
+			TUR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = WAL }
-			WAL = { country_event = 777321 }
+			WAL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = YUG }
-			YUG = { country_event = 777321 }
+			YUG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ALD }
-			ALD = { country_event = 777321 }
+			ALD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CNG }
-			CNG = { country_event = 777321 }
+			CNG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = EGY }
-			EGY = { country_event = 777321 }
+			EGY = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ETH }
-			ETH = { country_event = 777321 }
+			ETH = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MAD }
-			MAD = { country_event = 777321 }
+			MAD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LIB }
-			LIB = { country_event = 777321 }
+			LIB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MOR }
-			MOR = { country_event = 777321 }
+			MOR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NAL }
-			NAL = { country_event = 777321 }
+			NAL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ORA }
-			ORA = { country_event = 777321 }
+			ORA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SAF }
-			SAF = { country_event = 777321 }
+			SAF = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SOK }
-			SOK = { country_event = 777321 }
+			SOK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = RHO }
-			RHO = { country_event = 777321 }
+			RHO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TRI }
-			TRI = { country_event = 777321 }
+			TRI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TRN }
-			TRN = { country_event = 777321 }
+			TRN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TUN }
-			TUN = { country_event = 777321 }
+			TUN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ZAN }
-			ZAN = { country_event = 777321 }
+			ZAN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ZUL }
-			ZUL = { country_event = 777321 }
+			ZUL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ABU }
-			ABU = { country_event = 777321 }
+			ABU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = AFG }
-			AFG = { country_event = 777321 }
+			AFG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ARM }
-			ARM = { country_event = 777321 }
+			ARM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = AZB }
-			AZB = { country_event = 777321 }
+			AZB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BUK }
-			BUK = { country_event = 777321 }
+			BUK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GEO }
-			GEO = { country_event = 777321 }
+			GEO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HDJ }
-			HDJ = { country_event = 777321 }
+			HDJ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = IRQ }
-			IRQ = { country_event = 777321 }
+			IRQ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KHI }
-			KHI = { country_event = 777321 }
+			KHI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KOK }
-			KOK = { country_event = 777321 }
+			KOK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MUG }
-			MUG = { country_event = 777321 }
+			MUG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NEJ }
-			NEJ = { country_event = 777321 }
+			NEJ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = OMA }
-			OMA = { country_event = 777321 }
+			OMA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PER }
-			PER = { country_event = 777321 }
+			PER = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = YEM }
-			YEM = { country_event = 777321 }
+			YEM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HND }
-			HND = { country_event = 777321 }
+			HND = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = AWA }
-			AWA = { country_event = 777321 }
+			AWA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BAS }
-			BAS = { country_event = 777321 }
+			BAS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BER }
-			BER = { country_event = 777321 }
+			BER = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BHO }
-			BHO = { country_event = 777321 }
+			BHO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BIK }
-			BIK = { country_event = 777321 }
+			BIK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BUN }
-			BUN = { country_event = 777321 }
+			BUN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GWA }
-			GWA = { country_event = 777321 }
+			GWA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HYD }
-			HYD = { country_event = 777321 }
+			HYD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = IND }
-			IND = { country_event = 777321 }
+			IND = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JAI }
-			JAI = { country_event = 777321 }
+			JAI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JAS }
-			JAS = { country_event = 777321 }
+			JAS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JOD }
-			JOD = { country_event = 777321 }
+			JOD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KAL }
-			KAL = { country_event = 777321 }
+			KAL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KAS }
-			KAS = { country_event = 777321 }
+			KAS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KUT }
-			KUT = { country_event = 777321 }
+			KUT = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LAD }
-			LAD = { country_event = 777321 }
+			LAD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MAK }
-			MAK = { country_event = 777321 }
+			MAK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MEW }
-			MEW = { country_event = 777321 }
+			MEW = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MYS }
-			MYS = { country_event = 777321 }
+			MYS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NAG }
-			NAG = { country_event = 777321 }
+			NAG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NEP }
-			NEP = { country_event = 777321 }
+			NEP = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ORI }
-			ORI = { country_event = 777321 }
+			ORI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PAN }
-			PAN = { country_event = 777321 }
+			PAN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SHI }
-			SHI = { country_event = 777321 }
+			SHI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SIK }
-			SIK = { country_event = 777321 }
+			SIK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SIN }
-			SIN = { country_event = 777321 }
+			SIN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TRA }
-			TRA = { country_event = 777321 }
+			TRA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ATJ }
-			ATJ = { country_event = 777321 }
+			ATJ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BAL }
-			BAL = { country_event = 777321 }
+			BAL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BHU }
-			BHU = { country_event = 777321 }
+			BHU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BRU }
-			BRU = { country_event = 777321 }
+			BRU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BUR }
-			BUR = { country_event = 777321 }
+			BUR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CAM }
-			CAM = { country_event = 777321 }
+			CAM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CHI }
-			CHI = { country_event = 777321 }
+			CHI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = DAI }
-			DAI = { country_event = 777321 }
+			DAI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JAV }
-			JAV = { country_event = 777321 }
+			JAV = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = KOR }
-			KOR = { country_event = 777321 }
+			KOR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = LUA }
-			LUA = { country_event = 777321 }
+			LUA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JOH }
-			JOH = { country_event = 777321 }
+			JOH = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SIA }
-			SIA = { country_event = 777321 }
+			SIA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TIB }
-			TIB = { country_event = 777321 }
+			TIB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MGL }
-			MGL = { country_event = 777321 }
+			MGL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = WIA }
-			WIA = { country_event = 777321 }
+			WIA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PHI }
-			PHI = { country_event = 777321 }
+			PHI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MCK }
-			MCK = { country_event = 777321 }
+			MCK = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GXI }
-			GXI = { country_event = 777321 }
+			GXI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = SXI }
-			SXI = { country_event = 777321 }
+			SXI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = YNN }
-			YNN = { country_event = 777321 }
+			YNN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = XBI }
-			XBI = { country_event = 777321 }
+			XBI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = XIN }
-			XIN = { country_event = 777321 }
+			XIN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CAL }
-			CAL = { country_event = 777321 }
+			CAL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CAN }
-			CAN = { country_event = 777321 }
+			CAN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CHE }
-			CHE = { country_event = 777321 }
+			CHE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = COL }
-			COL = { country_event = 777321 }
+			COL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = COS }
-			COS = { country_event = 777321 }
+			COS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CSA }
-			CSA = { country_event = 777321 }
+			CSA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CUB }
-			CUB = { country_event = 777321 }
+			CUB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = DES }
-			DES = { country_event = 777321 }
+			DES = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = DOM }
-			DOM = { country_event = 777321 }
+			DOM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ELS }
-			ELS = { country_event = 777321 }
+			ELS = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GUA }
-			GUA = { country_event = 777321 }
+			GUA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HAI }
-			HAI = { country_event = 777321 }
+			HAI = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HAW }
-			HAW = { country_event = 777321 }
+			HAW = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MAN }
-			MAN = { country_event = 777321 }
+			MAN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MEX }
-			MEX = { country_event = 777321 }
+			MEX = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = MTC }
-			MTC = { country_event = 777321 }
+			MTC = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = HON }
-			HON = { country_event = 777321 }
+			HON = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NEN }
-			NEN = { country_event = 777321 }
+			NEN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NEW }
-			NEW = { country_event = 777321 }
+			NEW = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NIC }
-			NIC = { country_event = 777321 }
+			NIC = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PNM }
-			PNM = { country_event = 777321 }
+			PNM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = QUE }
-			QUE = { country_event = 777321 }
+			QUE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TEX }
-			TEX = { country_event = 777321 }
+			TEX = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = UCA }
-			UCA = { country_event = 777321 }
+			UCA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ARG }
-			ARG = { country_event = 777321 }
+			ARG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BOL }
-			BOL = { country_event = 777321 }
+			BOL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BRZ }
-			BRZ = { country_event = 777321 }
+			BRZ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CHL }
-			CHL = { country_event = 777321 }
+			CHL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = CLM }
-			CLM = { country_event = 777321 }
+			CLM = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ECU }
-			ECU = { country_event = 777321 }
+			ECU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PEU }
-			PEU = { country_event = 777321 }
+			PEU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PRG }
-			PRG = { country_event = 777321 }
+			PRG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = URU }
-			URU = { country_event = 777321 }
+			URU = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = VNZ }
-			VNZ = { country_event = 777321 }
+			VNZ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = AST }
-			AST = { country_event = 777321 }
+			AST = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = NZL }
-			NZL = { country_event = 777321 }
+			NZL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ISR }
-			ISR = { country_event = 777321 }
+			ISR = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BYZ }
-			BYZ = { country_event = 777321 }
+			BYZ = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ICL }
-			ICL = { country_event = 777321 }
+			ICL = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BAB }
-			BAB = { country_event = 777321 }
+			BAB = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = TPG }
-			TPG = { country_event = 777321 }
+			TPG = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = ARA }
-			ARA = { country_event = 777321 }
+			ARA = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = UBD }
-			UBD = { country_event = 777321 }
+			UBD = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = BYE }
-			BYE = { country_event = 777321 }
+			BYE = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = PLC }
-			PLC = { country_event = 777321 }
+			PLC = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = GCO }
-			GCO = { country_event = 777321 }
+			GCO = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 		any_owned = {
 			limit = { is_core = JAN }
-			JAN = { country_event = 777321 }
+			JAN = {
+				random_owned = {
+					limit = { owner = { NOT = { has_country_flag = martian_attack_sent } } }
+					owner = {
+						set_country_flag = martian_attack_sent
+						country_event = 777321
+					}
+				}
+			}
 		}
 	}
 }
 
-#Reinforcement Cylinders, every 180 days: each Martian pit grows its crew by 15% and gets 6 fresh tripods
 country_event = {
 	id = 777360
 	title = "EVTNAME777360"
@@ -3811,7 +5572,8 @@ country_event = {
 
 	option = {
 		name = "EVTOPTA777360"
-		country_event = { id = 777361 days = 180 }
+		country_event = { id = 777361 days = 90 }
+		country_event = { id = 777362 days = 20 }
 		any_owned = {
 			limit = {
 				has_province_modifier = martian_pit
@@ -3821,17 +5583,71 @@ country_event = {
 				limit = { type = soldiers }
 				reduce_pop = 1.15
 			}
-			sub_unit = { type = martian_tripod value = current }
-			sub_unit = { type = martian_tripod value = current }
-			sub_unit = { type = martian_tripod value = current }
-			sub_unit = { type = martian_tripod value = current }
-			sub_unit = { type = martian_tripod value = current }
-			sub_unit = { type = martian_tripod value = current }
+			add_province_modifier = { name = martian_production duration = 25 }
+			any_neighbor_province = {
+				limit = {
+					NOT = { owned_by = MAR }
+					owner = { NOT = { has_country_flag = martian_pit_warned } }
+				}
+				owner = {
+					set_country_flag = martian_pit_warned
+					country_event = 777363
+				}
+			}
 		}
 	}
 }
 
-#Relay for 777360 (an event can't schedule itself)
+country_event = {
+	id = 777362
+	title = "EVTNAME777362"
+	desc = "EVTDESC777362"
+	picture = "Artillery"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777362"
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_production
+				controlled_by = MAR
+			}
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			sub_unit = { type = martian_tripod value = current }
+			remove_province_modifier = martian_production
+		}
+		any_owned = {
+			limit = {
+				has_province_modifier = martian_production
+				NOT = { controlled_by = MAR }
+			}
+			remove_province_modifier = martian_production
+		}
+		any_country = {
+			limit = { has_country_flag = martian_pit_warned }
+			clr_country_flag = martian_pit_warned
+		}
+	}
+}
+
+country_event = {
+	id = 777363
+	title = "EVTNAME777363"
+	desc = "EVTDESC777363"
+	picture = "Riot"
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA777363"
+	}
+}
+
 country_event = {
 	id = 777361
 	title = "EVTNAME777360"
@@ -3843,5 +5659,842 @@ country_event = {
 	option = {
 		name = "EVTOPTA777360"
 		country_event = 777360
+	}
+}
+
+province_event = {
+	id = 777370
+	title = "EVTNAME777370"
+	desc = "EVTDESC777370"
+	picture = "Riot"
+
+	trigger = {
+		owned_by = MAR
+		controlled_by = MAR
+		NOT = { has_province_modifier = martian_pit }
+		has_pop_type = soldiers
+		OR = {
+			province_id = 132
+			province_id = 133
+			province_id = 153
+			province_id = 155
+			province_id = 159
+			province_id = 160
+			province_id = 161
+			province_id = 162
+			province_id = 163
+			province_id = 164
+			province_id = 165
+			province_id = 166
+			province_id = 167
+			province_id = 171
+			province_id = 220
+			province_id = 223
+			province_id = 224
+			province_id = 229
+			province_id = 230
+			province_id = 232
+			province_id = 233
+			province_id = 234
+			province_id = 235
+			province_id = 238
+			province_id = 240
+			province_id = 241
+			province_id = 245
+			province_id = 271
+			province_id = 277
+			province_id = 278
+			province_id = 282
+			province_id = 284
+			province_id = 289
+			province_id = 291
+			province_id = 292
+			province_id = 293
+			province_id = 295
+			province_id = 300
+			province_id = 301
+			province_id = 302
+			province_id = 303
+			province_id = 322
+			province_id = 334
+			province_id = 339
+			province_id = 340
+			province_id = 341
+			province_id = 342
+			province_id = 369
+			province_id = 372
+			province_id = 375
+			province_id = 378
+			province_id = 379
+			province_id = 380
+			province_id = 387
+			province_id = 388
+			province_id = 389
+			province_id = 390
+			province_id = 391
+			province_id = 392
+			province_id = 393
+			province_id = 394
+			province_id = 395
+			province_id = 397
+			province_id = 401
+			province_id = 402
+			province_id = 403
+			province_id = 404
+			province_id = 405
+			province_id = 408
+			province_id = 415
+			province_id = 416
+			province_id = 425
+			province_id = 426
+			province_id = 427
+			province_id = 477
+			province_id = 480
+			province_id = 481
+			province_id = 482
+			province_id = 483
+			province_id = 485
+			province_id = 486
+			province_id = 487
+			province_id = 488
+			province_id = 489
+			province_id = 490
+			province_id = 497
+			province_id = 518
+			province_id = 521
+			province_id = 528
+			province_id = 530
+			province_id = 534
+			province_id = 536
+			province_id = 539
+			province_id = 540
+			province_id = 544
+			province_id = 545
+			province_id = 546
+			province_id = 547
+			province_id = 549
+			province_id = 550
+			province_id = 551
+			province_id = 552
+			province_id = 553
+			province_id = 555
+			province_id = 556
+			province_id = 557
+			province_id = 558
+			province_id = 561
+			province_id = 562
+			province_id = 563
+			province_id = 564
+			province_id = 565
+			province_id = 566
+			province_id = 585
+			province_id = 586
+			province_id = 589
+			province_id = 595
+			province_id = 599
+			province_id = 603
+			province_id = 605
+			province_id = 616
+			province_id = 617
+			province_id = 619
+			province_id = 620
+			province_id = 621
+			province_id = 622
+			province_id = 623
+			province_id = 624
+			province_id = 625
+			province_id = 630
+			province_id = 631
+			province_id = 633
+			province_id = 639
+			province_id = 658
+			province_id = 664
+			province_id = 668
+			province_id = 670
+			province_id = 681
+			province_id = 682
+			province_id = 703
+			province_id = 720
+			province_id = 738
+			province_id = 739
+			province_id = 744
+			province_id = 746
+			province_id = 747
+			province_id = 748
+			province_id = 749
+			province_id = 750
+			province_id = 751
+			province_id = 752
+			province_id = 753
+			province_id = 754
+			province_id = 757
+			province_id = 794
+			province_id = 817
+			province_id = 826
+			province_id = 828
+			province_id = 834
+			province_id = 858
+			province_id = 859
+			province_id = 860
+			province_id = 963
+			province_id = 984
+			province_id = 988
+			province_id = 994
+			province_id = 995
+			province_id = 996
+			province_id = 997
+			province_id = 998
+			province_id = 999
+			province_id = 1000
+			province_id = 1003
+			province_id = 1008
+			province_id = 1009
+			province_id = 1010
+			province_id = 1011
+			province_id = 1012
+			province_id = 1013
+			province_id = 1014
+			province_id = 1015
+			province_id = 1017
+			province_id = 1108
+			province_id = 1121
+			province_id = 1151
+			province_id = 1157
+			province_id = 1162
+			province_id = 1166
+			province_id = 1167
+			province_id = 1178
+			province_id = 1191
+			province_id = 1196
+			province_id = 1198
+			province_id = 1202
+			province_id = 1209
+			province_id = 1219
+			province_id = 1221
+			province_id = 1222
+			province_id = 1227
+			province_id = 1242
+			province_id = 1244
+			province_id = 1248
+			province_id = 1249
+			province_id = 1250
+			province_id = 1251
+			province_id = 1252
+			province_id = 1253
+			province_id = 1254
+			province_id = 1255
+			province_id = 1256
+			province_id = 1257
+			province_id = 1261
+			province_id = 1262
+			province_id = 1265
+			province_id = 1266
+			province_id = 1267
+			province_id = 1268
+			province_id = 1269
+			province_id = 1270
+			province_id = 1271
+			province_id = 1272
+			province_id = 1274
+			province_id = 1276
+			province_id = 1277
+			province_id = 1278
+			province_id = 1279
+			province_id = 1282
+			province_id = 1283
+			province_id = 1284
+			province_id = 1288
+			province_id = 1292
+			province_id = 1293
+			province_id = 1295
+			province_id = 1296
+			province_id = 1297
+			province_id = 1298
+			province_id = 1299
+			province_id = 1300
+			province_id = 1301
+			province_id = 1302
+			province_id = 1313
+			province_id = 1314
+			province_id = 1318
+			province_id = 1319
+			province_id = 1326
+			province_id = 1328
+			province_id = 1329
+			province_id = 1332
+			province_id = 1334
+			province_id = 1346
+			province_id = 1356
+			province_id = 1364
+			province_id = 1369
+			province_id = 1375
+			province_id = 1385
+			province_id = 1393
+			province_id = 1394
+			province_id = 1405
+			province_id = 1409
+			province_id = 1413
+			province_id = 1438
+			province_id = 1455
+			province_id = 1465
+			province_id = 1488
+			province_id = 1493
+			province_id = 1494
+			province_id = 1495
+			province_id = 1496
+			province_id = 1497
+			province_id = 1498
+			province_id = 1500
+			province_id = 1501
+			province_id = 1502
+			province_id = 1504
+			province_id = 1527
+			province_id = 1530
+			province_id = 1532
+			province_id = 1534
+			province_id = 1535
+			province_id = 1547
+			province_id = 1550
+			province_id = 1552
+			province_id = 1563
+			province_id = 1572
+			province_id = 1576
+			province_id = 1579
+			province_id = 1587
+			province_id = 1593
+			province_id = 1600
+			province_id = 1601
+			province_id = 1612
+			province_id = 1613
+			province_id = 1614
+			province_id = 1615
+			province_id = 1616
+			province_id = 1617
+			province_id = 1618
+			province_id = 1624
+			province_id = 1649
+			province_id = 1650
+			province_id = 1651
+			province_id = 1652
+			province_id = 1653
+			province_id = 1657
+			province_id = 1669
+			province_id = 1674
+			province_id = 1676
+			province_id = 1677
+			province_id = 1680
+			province_id = 1690
+			province_id = 1702
+			province_id = 1708
+			province_id = 1725
+			province_id = 1732
+			province_id = 1741
+			province_id = 1745
+			province_id = 1746
+			province_id = 1747
+			province_id = 1748
+			province_id = 1749
+			province_id = 1750
+			province_id = 1751
+			province_id = 1755
+			province_id = 1759
+			province_id = 1763
+			province_id = 1765
+			province_id = 1772
+			province_id = 1852
+			province_id = 1855
+			province_id = 1887
+			province_id = 1948
+			province_id = 2036
+			province_id = 2062
+			province_id = 2101
+			province_id = 2105
+			province_id = 2113
+			province_id = 2115
+			province_id = 2162
+			province_id = 2163
+			province_id = 2167
+			province_id = 2170
+			province_id = 2171
+			province_id = 2172
+			province_id = 2173
+			province_id = 2174
+			province_id = 2175
+			province_id = 2176
+			province_id = 2177
+			province_id = 2179
+			province_id = 2180
+			province_id = 2186
+			province_id = 2213
+			province_id = 2247
+			province_id = 2264
+			province_id = 2279
+			province_id = 2295
+			province_id = 2310
+			province_id = 2313
+			province_id = 2324
+			province_id = 2339
+			province_id = 2344
+			province_id = 2348
+			province_id = 2349
+			province_id = 2350
+			province_id = 2351
+			province_id = 2352
+			province_id = 2353
+			province_id = 2354
+			province_id = 2359
+			province_id = 2360
+			province_id = 2361
+			province_id = 2363
+			province_id = 2441
+			province_id = 2442
+			province_id = 2443
+			province_id = 2445
+			province_id = 2446
+			province_id = 2447
+			province_id = 2448
+			province_id = 2449
+			province_id = 2450
+			province_id = 2451
+			province_id = 2452
+			province_id = 2455
+			province_id = 2560
+			province_id = 2567
+			province_id = 2570
+			province_id = 2575
+			province_id = 2580
+			province_id = 2583
+		}
+	}
+
+	mean_time_to_happen = { days = 30 }
+
+	option = {
+		name = "EVTOPTA777370"
+		add_province_modifier = { name = martian_pit duration = -1 }
+		add_province_modifier = { name = martian_harvest_pens duration = -1 }
+		any_pop = {
+			limit = { type = soldiers }
+			reduce_pop = 40
+		}
+	}
+}
+
+province_event = {
+	id = 777371
+	title = "EVTNAME777370"
+	desc = "EVTDESC777370"
+	picture = "Riot"
+
+	trigger = {
+		owned_by = MAR
+		controlled_by = MAR
+		NOT = { has_province_modifier = martian_pit }
+		NOT = { has_pop_type = soldiers }
+		OR = {
+			province_id = 132
+			province_id = 133
+			province_id = 153
+			province_id = 155
+			province_id = 159
+			province_id = 160
+			province_id = 161
+			province_id = 162
+			province_id = 163
+			province_id = 164
+			province_id = 165
+			province_id = 166
+			province_id = 167
+			province_id = 171
+			province_id = 220
+			province_id = 223
+			province_id = 224
+			province_id = 229
+			province_id = 230
+			province_id = 232
+			province_id = 233
+			province_id = 234
+			province_id = 235
+			province_id = 238
+			province_id = 240
+			province_id = 241
+			province_id = 245
+			province_id = 271
+			province_id = 277
+			province_id = 278
+			province_id = 282
+			province_id = 284
+			province_id = 289
+			province_id = 291
+			province_id = 292
+			province_id = 293
+			province_id = 295
+			province_id = 300
+			province_id = 301
+			province_id = 302
+			province_id = 303
+			province_id = 322
+			province_id = 334
+			province_id = 339
+			province_id = 340
+			province_id = 341
+			province_id = 342
+			province_id = 369
+			province_id = 372
+			province_id = 375
+			province_id = 378
+			province_id = 379
+			province_id = 380
+			province_id = 387
+			province_id = 388
+			province_id = 389
+			province_id = 390
+			province_id = 391
+			province_id = 392
+			province_id = 393
+			province_id = 394
+			province_id = 395
+			province_id = 397
+			province_id = 401
+			province_id = 402
+			province_id = 403
+			province_id = 404
+			province_id = 405
+			province_id = 408
+			province_id = 415
+			province_id = 416
+			province_id = 425
+			province_id = 426
+			province_id = 427
+			province_id = 477
+			province_id = 480
+			province_id = 481
+			province_id = 482
+			province_id = 483
+			province_id = 485
+			province_id = 486
+			province_id = 487
+			province_id = 488
+			province_id = 489
+			province_id = 490
+			province_id = 497
+			province_id = 518
+			province_id = 521
+			province_id = 528
+			province_id = 530
+			province_id = 534
+			province_id = 536
+			province_id = 539
+			province_id = 540
+			province_id = 544
+			province_id = 545
+			province_id = 546
+			province_id = 547
+			province_id = 549
+			province_id = 550
+			province_id = 551
+			province_id = 552
+			province_id = 553
+			province_id = 555
+			province_id = 556
+			province_id = 557
+			province_id = 558
+			province_id = 561
+			province_id = 562
+			province_id = 563
+			province_id = 564
+			province_id = 565
+			province_id = 566
+			province_id = 585
+			province_id = 586
+			province_id = 589
+			province_id = 595
+			province_id = 599
+			province_id = 603
+			province_id = 605
+			province_id = 616
+			province_id = 617
+			province_id = 619
+			province_id = 620
+			province_id = 621
+			province_id = 622
+			province_id = 623
+			province_id = 624
+			province_id = 625
+			province_id = 630
+			province_id = 631
+			province_id = 633
+			province_id = 639
+			province_id = 658
+			province_id = 664
+			province_id = 668
+			province_id = 670
+			province_id = 681
+			province_id = 682
+			province_id = 703
+			province_id = 720
+			province_id = 738
+			province_id = 739
+			province_id = 744
+			province_id = 746
+			province_id = 747
+			province_id = 748
+			province_id = 749
+			province_id = 750
+			province_id = 751
+			province_id = 752
+			province_id = 753
+			province_id = 754
+			province_id = 757
+			province_id = 794
+			province_id = 817
+			province_id = 826
+			province_id = 828
+			province_id = 834
+			province_id = 858
+			province_id = 859
+			province_id = 860
+			province_id = 963
+			province_id = 984
+			province_id = 988
+			province_id = 994
+			province_id = 995
+			province_id = 996
+			province_id = 997
+			province_id = 998
+			province_id = 999
+			province_id = 1000
+			province_id = 1003
+			province_id = 1008
+			province_id = 1009
+			province_id = 1010
+			province_id = 1011
+			province_id = 1012
+			province_id = 1013
+			province_id = 1014
+			province_id = 1015
+			province_id = 1017
+			province_id = 1108
+			province_id = 1121
+			province_id = 1151
+			province_id = 1157
+			province_id = 1162
+			province_id = 1166
+			province_id = 1167
+			province_id = 1178
+			province_id = 1191
+			province_id = 1196
+			province_id = 1198
+			province_id = 1202
+			province_id = 1209
+			province_id = 1219
+			province_id = 1221
+			province_id = 1222
+			province_id = 1227
+			province_id = 1242
+			province_id = 1244
+			province_id = 1248
+			province_id = 1249
+			province_id = 1250
+			province_id = 1251
+			province_id = 1252
+			province_id = 1253
+			province_id = 1254
+			province_id = 1255
+			province_id = 1256
+			province_id = 1257
+			province_id = 1261
+			province_id = 1262
+			province_id = 1265
+			province_id = 1266
+			province_id = 1267
+			province_id = 1268
+			province_id = 1269
+			province_id = 1270
+			province_id = 1271
+			province_id = 1272
+			province_id = 1274
+			province_id = 1276
+			province_id = 1277
+			province_id = 1278
+			province_id = 1279
+			province_id = 1282
+			province_id = 1283
+			province_id = 1284
+			province_id = 1288
+			province_id = 1292
+			province_id = 1293
+			province_id = 1295
+			province_id = 1296
+			province_id = 1297
+			province_id = 1298
+			province_id = 1299
+			province_id = 1300
+			province_id = 1301
+			province_id = 1302
+			province_id = 1313
+			province_id = 1314
+			province_id = 1318
+			province_id = 1319
+			province_id = 1326
+			province_id = 1328
+			province_id = 1329
+			province_id = 1332
+			province_id = 1334
+			province_id = 1346
+			province_id = 1356
+			province_id = 1364
+			province_id = 1369
+			province_id = 1375
+			province_id = 1385
+			province_id = 1393
+			province_id = 1394
+			province_id = 1405
+			province_id = 1409
+			province_id = 1413
+			province_id = 1438
+			province_id = 1455
+			province_id = 1465
+			province_id = 1488
+			province_id = 1493
+			province_id = 1494
+			province_id = 1495
+			province_id = 1496
+			province_id = 1497
+			province_id = 1498
+			province_id = 1500
+			province_id = 1501
+			province_id = 1502
+			province_id = 1504
+			province_id = 1527
+			province_id = 1530
+			province_id = 1532
+			province_id = 1534
+			province_id = 1535
+			province_id = 1547
+			province_id = 1550
+			province_id = 1552
+			province_id = 1563
+			province_id = 1572
+			province_id = 1576
+			province_id = 1579
+			province_id = 1587
+			province_id = 1593
+			province_id = 1600
+			province_id = 1601
+			province_id = 1612
+			province_id = 1613
+			province_id = 1614
+			province_id = 1615
+			province_id = 1616
+			province_id = 1617
+			province_id = 1618
+			province_id = 1624
+			province_id = 1649
+			province_id = 1650
+			province_id = 1651
+			province_id = 1652
+			province_id = 1653
+			province_id = 1657
+			province_id = 1669
+			province_id = 1674
+			province_id = 1676
+			province_id = 1677
+			province_id = 1680
+			province_id = 1690
+			province_id = 1702
+			province_id = 1708
+			province_id = 1725
+			province_id = 1732
+			province_id = 1741
+			province_id = 1745
+			province_id = 1746
+			province_id = 1747
+			province_id = 1748
+			province_id = 1749
+			province_id = 1750
+			province_id = 1751
+			province_id = 1755
+			province_id = 1759
+			province_id = 1763
+			province_id = 1765
+			province_id = 1772
+			province_id = 1852
+			province_id = 1855
+			province_id = 1887
+			province_id = 1948
+			province_id = 2036
+			province_id = 2062
+			province_id = 2101
+			province_id = 2105
+			province_id = 2113
+			province_id = 2115
+			province_id = 2162
+			province_id = 2163
+			province_id = 2167
+			province_id = 2170
+			province_id = 2171
+			province_id = 2172
+			province_id = 2173
+			province_id = 2174
+			province_id = 2175
+			province_id = 2176
+			province_id = 2177
+			province_id = 2179
+			province_id = 2180
+			province_id = 2186
+			province_id = 2213
+			province_id = 2247
+			province_id = 2264
+			province_id = 2279
+			province_id = 2295
+			province_id = 2310
+			province_id = 2313
+			province_id = 2324
+			province_id = 2339
+			province_id = 2344
+			province_id = 2348
+			province_id = 2349
+			province_id = 2350
+			province_id = 2351
+			province_id = 2352
+			province_id = 2353
+			province_id = 2354
+			province_id = 2359
+			province_id = 2360
+			province_id = 2361
+			province_id = 2363
+			province_id = 2441
+			province_id = 2442
+			province_id = 2443
+			province_id = 2445
+			province_id = 2446
+			province_id = 2447
+			province_id = 2448
+			province_id = 2449
+			province_id = 2450
+			province_id = 2451
+			province_id = 2452
+			province_id = 2455
+			province_id = 2560
+			province_id = 2567
+			province_id = 2570
+			province_id = 2575
+			province_id = 2580
+			province_id = 2583
+		}
+	}
+
+	mean_time_to_happen = { days = 30 }
+
+	option = {
+		name = "EVTOPTA777370"
+		add_province_modifier = { name = martian_pit duration = -1 }
+		add_province_modifier = { name = martian_harvest_pens duration = -1 }
+		any_pop = {
+			limit = { type = slaves }
+			pop_type = soldiers
+			reduce_pop = 0.6
+		}
 	}
 }

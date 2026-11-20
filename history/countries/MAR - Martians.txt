@@ -25,7 +25,6 @@ unemployment_subsidies = no_subsidies
 pensions = no_pensions
 school_reforms = no_schools
 
-# Inventions
 martian_fighting_machines = yes
 black_smoke = yes
 martian_naval_engineering = yes

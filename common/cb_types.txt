@@ -1,43 +1,3 @@
-# INSTRUCTIONS:
-# -------------
-# constructing_cb - default to yes. if "no", cant be picked for generation or as add_wargoal if no CB already
-# is_triggered_only - Triggered from within the code or by event effects. DO NOT REMOVE THE STOCK ONES.
-# mutual - The CB effects will also be used by the defender in peace treaties
-# months - The number of months this CB will be valid. Only works for triggered CBs.
-# prerequisites - A condition that automatically activates a CB. Does not work for triggered CBs. 'THIS' scope is the target country.
-# badboy_factor - Multiplied with any badboy increase normally associated with a peace option.
-# prestige_factor - Multiplied with any prestige increase normally associated with a peace option.
-# peace_cost_factor - Multiplied with the cost of the peace options in the peace treaty
-# po_xxx - Peace options. If toggled on, badboy_factor and prestige_factor are multiplied with any associated base changes to these (see defines.txt.)
-# allowed_states - If 'po_demand_states' is on, badboy_factor applies to these provinces. 'THIS' scope is us.
-# on_add - effect triggered when war goal added (triggering country's scope)
-# construction_speed - base modifier for how long creating this CB will take. default is 1. 1.2 means 20% faster
-# great_war_obligatory - cb is always added to the peace offer/demand in great wars.
-# po_remove_cores - may be used only with: po_transfer_provinces, po_demand_state, po_annex
-# crisis - can be offered as a wargoal in a crisis
-#
-# The peace options are:
-#po_annex
-#po_demand_state
-#po_add_to_sphere
-#po_disarmament
-#po_reparations
-#po_transfer_provinces
-#po_remove_prestige
-#po_make_puppet
-#po_release_puppet
-#po_status_quo
-#po_install_communist_gov_type
-#po_uninstall_communist_gov_type
-#po_remove_cores
-#po_colony
-
-# NOTE: The order in which the peace options are listed is the order in which the AI will normally prioritize them in peace treaties
-
-# TRIGGERED - Triggered from within the code or by event effects
-# --------------------------------------------------------------
-
-# Order that CBs are executed in a peace treaty
 peace_order = { 
 add_to_sphere 
 take_from_sphere 
@@ -148,7 +108,6 @@ status_quo = {
 	war_name = WAR_NAME
 }
 
-# Conquest
 conquest = {
 	sprite_index = 2
 	is_triggered_only = yes
@@ -157,7 +116,6 @@ conquest = {
 	
 	can_use = {
 		NOT = { is_our_vassal = THIS }
-		# only one state or unciv
 		NOT = { number_of_states = 5 }
 		OR = {
 			AND = {
@@ -212,7 +170,6 @@ conquest = {
 	war_name = WAR_CONQUEST_NAME
 }
 
-# Civil war
 civil_war = {
 	sprite_index = 2
 	is_triggered_only = yes
@@ -229,7 +186,7 @@ civil_war = {
 	prestige_factor = 1
 	peace_cost_factor = 1
 	penalty_factor = 1
-	is_civil_war = yes #this is a civil war
+	is_civil_war = yes
 
 	break_truce_prestige_factor = 5
 	break_truce_infamy_factor = 2
@@ -253,7 +210,6 @@ civil_war = {
 	}
 }
 
-# Sphere of Influence Gain
 add_to_sphere = {
 	sprite_index = 3
 	is_triggered_only = yes
@@ -326,9 +282,6 @@ take_from_sphere = {
 	}
 
 	
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
 	allowed_countries = {
 		is_sphere_leader_of = FROM
 		OR = {
@@ -350,7 +303,6 @@ take_from_sphere = {
 	}
 }
 
-# Acquire Core State
 acquire_core_state = {
 	sprite_index = 5
 	is_triggered_only = yes
@@ -375,7 +327,7 @@ acquire_core_state = {
 
 	can_use = {
 		NOT = { is_our_vassal = THIS }
-		number_of_states = 2 # annex if you want their last state
+		number_of_states = 2
 		any_owned_province = {
 			is_core = THIS
 		}
@@ -401,7 +353,6 @@ acquire_core_state = {
 	}
 }
 
-# Annex Core Country
 annex_core_country = {
 	sprite_index = 5
 	is_triggered_only = yes
@@ -450,7 +401,6 @@ annex_core_country = {
 	}
 }
 
-# Gain control of Substate region
 acquire_substate_region = {
 	sprite_index = 6
 	is_triggered_only = yes
@@ -474,7 +424,7 @@ acquire_substate_region = {
 
 	can_use = {
 		NOT = { is_our_vassal = THIS }
-		num_of_substates = 1 # if has any substate
+		num_of_substates = 1
 		any_substate = {
 			number_of_states = 1
 			any_owned_province = {
@@ -506,8 +456,6 @@ acquire_substate_region = {
 	}
 }
 
-
-# Gain control of State
 acquire_state = {
 	sprite_index = 6
 	is_triggered_only = yes
@@ -530,7 +478,7 @@ acquire_state = {
 
 	can_use = {
 		NOT = { is_our_vassal = THIS }
-		number_of_states = 2 # annex if you want their last state
+		number_of_states = 2
 		any_owned_province = {
 			not = { is_core = THIS }
 			is_colonial = no
@@ -582,7 +530,6 @@ acquire_state = {
 	}
 }
 
-# Place in the Sun
 place_in_the_sun = {
 	sprite_index = 7
 	is_triggered_only = yes
@@ -637,11 +584,10 @@ place_in_the_sun = {
 	}
 }
 
-# Colonial competition
 colonial_competition = {
 	sprite_index = 7
 	is_triggered_only = yes
-	constructing_cb = no    # only used in crises
+	constructing_cb = no
 	crisis = no
 	months = 12
 
@@ -672,7 +618,6 @@ colonial_competition = {
 	}
 }
 
-# Cut Down to size
 cut_down_to_size = {
 	sprite_index = 8
 	is_triggered_only = yes
@@ -752,7 +697,6 @@ cut_down_to_size_boxer = {
 	}
 }
 
-# Free Peoples
 free_peoples = {
 	sprite_index = 9
 	is_triggered_only = yes
@@ -777,9 +721,6 @@ free_peoples = {
 		NOT = { is_our_vassal = THIS }
 	}
 
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
 	allowed_countries = {
 		number_of_states = 2
 		NOT = {
@@ -812,9 +753,6 @@ free_peoples = {
 		is_releasable_vassal = FROM
 	}
 
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal's state
 	allowed_states = {
 		any_owned_province = {
 			is_core = FROM
@@ -834,7 +772,6 @@ free_peoples = {
 	}
 }
 
-# Liberate country
 liberate_country = {
 	sprite_index = 15
 	is_triggered_only = yes
@@ -859,9 +796,6 @@ liberate_country = {
 		NOT = { is_our_vassal = THIS }
 	}
 
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
 	allowed_countries = {
 		number_of_states = 2
 		NOT = {
@@ -877,7 +811,6 @@ liberate_country = {
 							tag = SCA
 							tag = ITA
 							tag = YUG
-							#tag = ROM # TODO: shoudl we let the rest be liberated too?
 							tag = CZH
 						}
 					}
@@ -894,9 +827,6 @@ liberate_country = {
 		is_releasable_vassal = FROM
 	}
 
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal's state
 	allowed_states = {
 		any_owned_province = {
 			is_core = FROM
@@ -917,7 +847,6 @@ liberate_country = {
 	}
 }
 
-# Dismantle fortifications (forts + naval bases)
 dismantle_forts = {
 	sprite_index = 16
 	is_triggered_only = yes
@@ -942,9 +871,6 @@ dismantle_forts = {
 		NOT = { is_our_vassal = THIS }
 	}
 
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal's state
 	allowed_states = {
 		any_owned_province = {
 			OR = { 
@@ -968,8 +894,6 @@ dismantle_forts = {
 	}
 }
 
-
-# Release Puppet
 release_puppet = {
 	sprite_index = 10
 	is_triggered_only = yes
@@ -994,9 +918,6 @@ release_puppet = {
 		num_of_vassals_no_substates = 1
 	}
 	
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
 	allowed_countries = {
 		is_our_vassal = FROM
 		FROM = { is_substate = no }
@@ -1016,7 +937,6 @@ release_puppet = {
 	}
 }
 
-# Make Puppet
 make_puppet = {
 	sprite_index = 10
 	is_triggered_only = yes
@@ -1044,13 +964,6 @@ make_puppet = {
 		is_vassal = no
 	}
 	
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
-	#allowed_countries = {
-	#	NOT = { is_our_vassal = FROM }
-		#FROM = { is_substate = no }
-	#}
 	
 	po_make_puppet = yes
 
@@ -1065,7 +978,6 @@ make_puppet = {
 	}
 }
 
-# Become Independent
 become_independent = {
 	sprite_index = 10
 	is_triggered_only = yes
@@ -1092,9 +1004,6 @@ become_independent = {
 		is_our_vassal = THIS
 	}
 	
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
 	allowed_countries = {
 		OR = {
 			FROM = { is_our_vassal = THIS }
@@ -1121,8 +1030,6 @@ become_independent = {
 	}
 }
 
-
-# Humiliate
 humiliate = {
 	sprite_index = 11
 	is_triggered_only = yes
@@ -1161,7 +1068,6 @@ humiliate = {
 	}
 }
 
-# Demand Concession
 demand_concession_casus_belli = {
 	sprite_index = 7
 	is_triggered_only = yes
@@ -1214,7 +1120,6 @@ demand_concession_casus_belli = {
 	}
 }
 
-# Establish Protectorate
 establish_protectorate_casus_belli = {
 	sprite_index = 7
 	is_triggered_only = yes
@@ -1273,7 +1178,6 @@ establish_protectorate_casus_belli = {
 	}
 }
 
-# Unification Humiliate
 unification_humiliate_cb = {
 	sprite_index = 11
 	is_triggered_only = no
@@ -1311,7 +1215,7 @@ unification_humiliate_cb = {
 	
 	po_clear_union_sphere = yes
 	
-	tws_battle_factor = 2.0 # battle score twice that of oppenent
+	tws_battle_factor = 2.0
 	
 	war_name = UNIFICATION_HUMILIATE_NAME
 	
@@ -1324,7 +1228,6 @@ unification_humiliate_cb = {
 	}
 }
 
-# Release Puppet
 unification_release_puppet_cb = {
 	sprite_index = 10
 	is_triggered_only = yes
@@ -1361,9 +1264,6 @@ unification_release_puppet_cb = {
 		}		
 	}
 	
-	# THIS - us
-	# FROM - country scope is possible match?
-	# war target country of goal is scope
 	allowed_countries = {
 		is_our_vassal = FROM
 		FROM = { is_culture_group = THIS is_substate = no }
@@ -1383,7 +1283,6 @@ unification_release_puppet_cb = {
 	}
 }
 
-# Unification Demand State
 unification_casus_belli = {
 	sprite_index = 5
 	is_triggered_only = no
@@ -1452,7 +1351,6 @@ unification_casus_belli = {
 	}
 }
 
-#Unification Annex
 unification_annex_casus_belli = {
 	sprite_index = 5
 	is_triggered_only = no
@@ -1510,7 +1408,6 @@ unification_annex_casus_belli = {
 	}
 }
 
-# Bad Boy
 rude_boy = {
 	sprite_index = 11
 	is_triggered_only = no
@@ -1554,7 +1451,6 @@ rude_boy = {
 	}
 }
 
-# Install Communist Government
 install_communist_gov_cb = {
 	sprite_index = 12
 	is_triggered_only = yes
@@ -1577,31 +1473,21 @@ install_communist_gov_cb = {
 
 	can_use = {
 		THIS = {
-			# If actor is a great power
 			is_greater_power = yes
 			
-			# If actor gov truly communist
 			government = proletarian_dictatorship
 			
-			# If actor ruling party is communist
 			ruling_party_ideology = communist
 		}
 		
 		AND = {
-			# If reciever ruling party is not a communist
-			#NOT = {
-			#	ruling_party_ideology = communist
-			#}
 			
-			# There are some amount of communist already in the country
 			communist = 0.1
 				
-			# If reciever current gov is not proletarian_dictatorship
 			NOT = {
 				government = proletarian_dictatorship
 			}
 			
-			# If reciever is not a great power
 			is_greater_power = no
 		}
 	}
@@ -1628,15 +1514,12 @@ install_communist_gov_cb = {
 	}
 }
 
-# Revert from Communist Government
 uninstall_communist_gov_cb = {
 	sprite_index = 13
 	is_triggered_only = yes
 	months = 12
 	crisis = no
 	
-	# Is automatically added to countries that intervened at while install_communist_gov_cb
-	# so they can revert those countries government.
 	constructing_cb = no
 
 	badboy_factor = 1
@@ -1655,13 +1538,11 @@ uninstall_communist_gov_cb = {
 
 	can_use = {
 		THIS = {
-			# If actor ruling party is not communist
 			NOT = {
 				ruling_party_ideology = communist
 			}
 		}
 		
-		# If reciever current gov is proletarian_dictatorship
 		government = proletarian_dictatorship
 	}
 	
@@ -1678,8 +1559,6 @@ uninstall_communist_gov_cb = {
 	}
 }
 
-
-# Great War Penalty
 great_war_penalty_cb = {
 	sprite_index = 14
 	is_triggered_only = yes
@@ -1709,10 +1588,6 @@ great_war_penalty_cb = {
 
 	war_name = WAR_NAME
 	
-	#can_use = {
-	#	NOT = { is_our_vassal = THIS }
-	#	is_disarmed = no
-	#}
 	
 	on_add = {
 		move_issue_percentage = { 
@@ -1762,7 +1637,7 @@ martian_extermination = {
 
 	badboy_factor = 0
 	prestige_factor = 1
-	peace_cost_factor = 1.2
+	peace_cost_factor = 100
 	penalty_factor = 1
 
 	break_truce_prestige_factor = 0
@@ -1770,7 +1645,7 @@ martian_extermination = {
 	break_truce_militancy_factor = 0
 	truce_months = 0
 
-	po_annex = yes
+	po_status_quo = yes
 
 	war_name = WOTW_WAR_NAME
 }

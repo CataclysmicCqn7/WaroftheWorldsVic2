@@ -1,21 +1,14 @@
-##################################################################################################
-# scriptable and usable for event-system below.
-##################################################################################################
-
-##### POLITICAL EVENTS ######
 government_sanitarium = {
 	population_growth = 0.005
 	icon = 19
 }
 
-##### TECH SCHOOLS ######
 academic_confusion = {
 	research_points_modifier = -0.01
 	prestige = -0.01
 	icon = 6
 }
 
-##### LIBERAL REVOLUTIONS #####
 liberal_agitation = {
 	pop_consciousness_modifier = 0.1
 	icon = 4
@@ -68,7 +61,6 @@ national_tragedy = {
 	icon = 15
 }
 
-##### CIVILIZATION AND GUNBOATS #####
 western_influences = {
 	global_pop_militancy_modifier = 0.1
 	global_pop_consciousness_modifier = 0.05
@@ -153,7 +145,7 @@ colonial_mismanagement = {
 }
 
 colonial_recruitment = {
-	immigrant_attract = 1		#100%
+	immigrant_attract = 1
 	life_rating = 0.1
 	population_growth = 0.01
 	assimilation_rate = 0.25
@@ -178,8 +170,6 @@ muhammad_alis_reforms = {
 	icon = 5
 }
 
-##### SUFFRAGETTE MOVEMENTS #####
-
 female_suffrage = {
 	poor_vote = 0.05
 	middle_vote = 0.02
@@ -187,8 +177,6 @@ female_suffrage = {
 	core_pop_militancy_modifier = -0.02
 	icon = 7
 }
-
-##### SOCIALISM AND FACISM #####
 
 labor_union = {
 	core_pop_consciousness_modifier = 0.05
@@ -275,7 +263,6 @@ beer_hall_putsch = {
 	icon = 18
 }
 
-##### Civilization & Gunboats #####
 local_opium_habit = {
 	mine_rgo_eff = -0.2
 	farm_rgo_eff = -0.2
@@ -328,7 +315,6 @@ local_economic_downturn = {
 	icon = 12
 }
 
-##### AMERICAN CIVIL WAR #####
 free_staters = {
 	life_rating = -0.02
 	pop_militancy_modifier = 0.05
@@ -375,7 +361,7 @@ anaconda_plan = {
 }
 
 the_homestead_act = {
-	global_immigrant_attract = 0.5	#50%
+	global_immigrant_attract = 0.5
 	global_assimilation_rate = 0.5
 	icon = 9
 }
@@ -392,7 +378,6 @@ the_bonnie_blue_flag = {
 	icon = 15
 }
 
-##### WORKPLACE EVENTS #####
 silk_famine = {
 	farm_rgo_eff = -0.5
 	icon = 14
@@ -404,7 +389,6 @@ blood_and_iron_mine = {
 	icon = 14
 }
 
-##### TEMPERANCE LEAGUE #####
 libertine_culture = {
 	prestige = -0.01
 	farm_rgo_eff = -0.05
@@ -441,8 +425,6 @@ liquor_prohibition = {
 	icon = 2
 }
 
-
-##### NATIONALIST UPRISINGS #####
 minority_building_restrictions = {
 	non_accepted_pop_militancy_modifier = 0.05
 	assimilation_rate = 0.05
@@ -474,7 +456,6 @@ organic_work = {
 	icon = 13
 }
 
-##### GREAT POWERS #####
 protector_of_eastern_christendom = {
 	prestige = 0.1
 	icon = 17
@@ -492,7 +473,7 @@ international_negotiations = {
 
 the_statue_of_liberty = {
 	prestige = 0.4
-	global_immigrant_attract = 2	#200%
+	global_immigrant_attract = 2
 	global_assimilation_rate = 5.0
 	icon = 15
 }
@@ -502,7 +483,6 @@ the_congo_reform_association = {
 	icon = 17
 }
 
-### GER - GERMANY, PRU - PRUSSIA ###
 germania_werft = {
 	local_repair = 0.5
 	local_ship_build = -0.05
@@ -524,9 +504,8 @@ prussian_general_staff = {
 	icon = 15
 }
 
-##### Boer War #####
 trek_boers = {
-	immigrant_attract = 2		#200%
+	immigrant_attract = 2
 	icon = 19
 }
 
@@ -536,7 +515,7 @@ boer_exodus = {
 }
 
 gold_rush = {
-	immigrant_attract = 3		#300%
+	immigrant_attract = 3
 	life_rating = 0.5
 	icon = 11
 }
@@ -546,7 +525,6 @@ witwatersrand_gold_rush = {
 	icon = 11
 }
 
-##### RGO Spread Events #####
 local_tractors = {
 	farm_RGO_eff = 0.5
 	icon = 13
@@ -574,14 +552,12 @@ local_machine_tools = {
 	icon = 13
 }
 
-##### Diseases & Famines #####
 pandemic_influenza = {
 	global_population_growth = -0.01
 	global_pop_consciousness_modifier = 0.1
 	icon = 18
 }
 
-##### Crime & Punishment #####
 trustee_system = {
 	pop_militancy_modifier = 0.01
 	pop_consciousness_modifier = 0.02
@@ -596,7 +572,6 @@ penal_colonies = {
 	icon = 9
 }
 
-##### Economic Events #####
 stock_market_crash = {
 	factory_throughput = -0.2
 	rgo_output = -0.2
@@ -631,7 +606,6 @@ economic_boom = {
 	icon = 11
 }
 
-#### ENG - ENGLAND #####
 corn_laws_repealed = {
 	max_tariff = -0.05
 	global_pop_militancy_modifier = -0.02
@@ -644,16 +618,14 @@ the_yard = {
 	icon = 1
 }
 
-#### SPA - Spain ####
 la_guardia_civil = {
 	tax_efficiency = 0.01
 	icon = 1
 }
 
-#### FRA - France ####
 the_french_foreign_legion = {
 	prestige = 0.01
-	global_immigrant_attract = 0.01	#1%..
+	global_immigrant_attract = 0.01
 	icon = 17
 }
 
@@ -662,7 +634,6 @@ the_eiffel_tower = {
 	icon = 15
 }
 
-#### SWI - Switzerland ####
 signed_the_geneva_convention = {
 	war_exhaustion = -0.02
 	org_regain = 0.05
@@ -670,7 +641,6 @@ signed_the_geneva_convention = {
 	icon = 7
 }
 
-#### SWE - Sweden ####
 folkis_educates = {
 	research_points_modifier = 0.01
 	icon = 5
@@ -681,20 +651,17 @@ motala_verkstad = {
 	icon = 13
 }
 
-### NEN - New England ###
 miskatonic_campus = {
 	research_points_modifier = 0.1
 	pop_consciousness_modifier = 0.01
 	icon = 5
 }
 
-### BAV - Bavaria ###
 the_walhalla = {
 	prestige = 0.01
 	icon = 15
 }
 
-######CB generation######
  CB_gen_plus = {
 	cb_generation_speed_modifier = 0.25
  }
@@ -703,7 +670,6 @@ the_walhalla = {
 	cb_generation_speed_modifier = -0.25
  }
  
- ##more event modifiers
  recent_safari = {
 	prestige = 0.001
  }
@@ -726,7 +692,6 @@ the_walhalla = {
 	icon = 17
  }
  
- ##
  meiji_restoration_boost = {
 	research_points_modifier = 0.3
 	icon = 5
@@ -759,18 +724,14 @@ liberian_research_boost = {
 	icon = 5
 }
 
-##### WAR OF THE WORLDS #####
-# Set by landing events on each new pit. Turns into martian_pit once the crew emerges.
 martian_landing_site = {
 	icon = 18
 }
 
-# The pit: its soldier pop is the Martian crew.
 martian_pit = {
 	icon = 18
 }
 
-# Humans penned and harvested. No RGO output in Martian land.
 martian_harvest_pens = {
 	local_rgo_output = -1
 	immigrant_attract = -1
@@ -778,38 +739,41 @@ martian_harvest_pens = {
 	icon = 8
 }
 
-# Head start, stage 1: the cylinder is still closed (30 days)
 martian_unscrewing = {
 	icon = 18
 }
 
-# Head start, stage 2: the crew is building the first fighting machines (120 days)
 martian_assembling = {
 	icon = 18
 }
 
-# Permanent, MAR only: alien organisation
 martian_technology = {
 	land_organisation = 1
 	reinforce_speed = 1
-	leadership_modifier = -1	# no leadership: the Martians never recruit generals
-	research_points_modifier = -1	# no research: Martian technology comes from inventions only
-	war_exhaustion = -1	# never tire of war: keeps the AI from accepting peace
+	leadership_modifier = -1
+	research_points_modifier = -1
+	war_exhaustion = -1
 	icon = 5
 }
 
-# Red Weed: chokes fields (no life rating change)
 martian_red_weed = {
 	local_rgo_output = -0.5
 	population_growth = -0.005
 	icon = 18
 }
 
-# A Martian province held by someone else; while the timer runs, the core owner waits to get it back
 martian_hold_broken = {
 	icon = 4
 }
 
 martian_hold_broken_timer = {
 	icon = 4
+}
+
+martian_vanguard = {
+	icon = 18
+}
+
+martian_production = {
+	icon = 18
 }

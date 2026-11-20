@@ -71,6 +71,18 @@ EVTOPTA777326;Retake them.;;;;;;;;;;;;;x
 EVTNAME777327;Expand the Harvest;;;;;;;;;;;;;x
 EVTDESC777327;Not all of the humans around us are at war with us yet.;;;;;;;;;;;;;x
 EVTOPTA777327;Every human is prey.;;;;;;;;;;;;;x
-EVTNAME777360;Reinforcement Cylinders;;;;;;;;;;;;;x
-EVTDESC777360;Fresh cylinders have come down into our pits, bringing new crews and the parts for more fighting machines.;;;;;;;;;;;;;x
-EVTOPTA777360;Assemble them.;;;;;;;;;;;;;x
+EVTNAME777360;Assembly in the Pits;;;;;;;;;;;;;x
+EVTDESC777360;The crews in every pit we hold have begun assembling a new batch of fighting machines. In twenty days they will be ready, if the pits are still ours.;;;;;;;;;;;;;x
+EVTOPTA777360;Build.;;;;;;;;;;;;;x
+EVTNAME777117;The First Machines;;;;;;;;;;;;;x
+EVTDESC777117;The cylinder was not empty. Before the lid has even fallen, the first fighting machines have been assembled and stride out of the pit.;;;;;;;;;;;;;x
+EVTOPTA777117;Clear the ground.;;;;;;;;;;;;;x
+EVTNAME777362;The Machines Rise;;;;;;;;;;;;;x
+EVTDESC777362;A new batch of fighting machines has risen from our pits.;;;;;;;;;;;;;x
+EVTOPTA777362;Walk.;;;;;;;;;;;;;x
+EVTNAME777363;Activity in the Pit;;;;;;;;;;;;;x
+EVTDESC777363;Our scouts report a great clamour of machinery from the Martian pit near our border. New fighting machines will rise within weeks unless the pit is taken first.;;;;;;;;;;;;;x
+EVTOPTA777363;Then we must take it.;;;;;;;;;;;;;x
+EVTNAME777370;A New Pit Is Dug;;;;;;;;;;;;;x
+EVTDESC777370;The Martians have dug a great pit at $PROVINCENAME$. From here, too, fighting machines will soon rise.;;;;;;;;;;;;;x
+EVTOPTA777370;Another forge for the machines.;;;;;;;;;;;;;x

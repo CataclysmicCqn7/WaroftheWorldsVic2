@@ -28,7 +28,6 @@ guiTypes = {
 		}
 	}
 	
-	### FILTER CHECKBOXES
 	windowType = {
 		name = "subunit_filter"
 		backGround=""
@@ -47,7 +46,6 @@ guiTypes = {
 		}
 	}
 	
-	####   build unit entry (used in province view)
 	windowType = {
 		name = "build_unit_entry"
 		backGround=""
@@ -125,7 +123,6 @@ guiTypes = {
 		}
 	}
 
-	####   build unit entry (used in military view - contains PopSize text)
 	windowType = {
 		name = "build_unit_entry_wide"
 		backGround=""
@@ -209,12 +206,10 @@ guiTypes = {
 			text = ""
 			maxWidth = 32
 			maxHeight = 30
-			#fixedsize = yes
 			format = center
 		}
 	}
 	
-	#### queue unit entry
 	windowType = {
 		name = "queue_unit_entry"
 		backGround=""
@@ -287,7 +282,6 @@ guiTypes = {
 		}
 	}
 	
-#### BACKGROUND + LISTBOXES
 	windowType = {
 		name = "build_unit_view"
 		backGround=""
@@ -338,7 +332,6 @@ guiTypes = {
 			size = { x=363  y =261}
 			Orientation = "UPPER_LEFT"
 			spacing = 2
-			#scrollbartype = "standardlistbox_slider"
 			borderSize = {x = 0 y = 0}
 		}
 		
@@ -349,7 +342,6 @@ guiTypes = {
 			size = { x=363  y =116}
 			Orientation = "UPPER_LEFT"
 			spacing = 2
-			#scrollbartype = "standardlistbox_slider"
 			borderSize = {x = 0 y = 0}
 		}		
 		
@@ -463,7 +455,6 @@ guiTypes = {
 	}
 	
 	
-	##### INTERFACE IN MILITARY SCREEN.
 	windowType = {
 		name = "build_unit_view_large"
 		backGround=""
@@ -551,9 +542,7 @@ guiTypes = {
 			quadTextureSprite ="GFX_cancel_all_units"
 		}
 		
-		### (new) FOLDER BUTTONS.
 		
-		# army.
 		guiButtonType = {
 			name = "unit_folder_17"
 			position = { x=8 y =31}
@@ -610,12 +599,11 @@ guiTypes = {
 			quadTextureSprite ="GFX_unit_folder_army_10_plane"
 		}
 		guiButtonType = {
-			name = "unit_folder_22"	# martian_tripod
+			name = "unit_folder_22"
 			position = { x= 371 y =31}
-			quadTextureSprite ="GFX_unit_folder_army_9_tank"	# temporary icon
+			quadTextureSprite ="GFX_unit_folder_army_9_tank"
 		}
 		
-		# navy.
 		
 		guiButtonType = {
 			name = "unit_folder_6"
@@ -685,7 +673,6 @@ guiTypes = {
 			size = { x=395  y =466}
 			Orientation = "UPPER_LEFT"
 			spacing = 2
-			#scrollbartype = "standardlistbox_slider"
 			borderSize = {x = 0 y = 0}
 		}
 		
@@ -696,7 +683,6 @@ guiTypes = {
 			size = { x=240  y =495}
 			Orientation = "UPPER_LEFT"
 			spacing = 2
-			#scrollbartype = "standardlistbox_slider"
 			borderSize = {x = 0 y = 0}
 		}
 		
